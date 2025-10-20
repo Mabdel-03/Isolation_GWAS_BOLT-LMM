@@ -53,7 +53,7 @@ plink2 \
     --indep-pairwise 1000 50 0.5 \
     --out ${output_prefix} \
     --threads 8 \
-    --memory 60000
+    --memory 78000
 
 # The above command creates two files:
 # - ${output_prefix}.prune.in  (SNPs to keep)
