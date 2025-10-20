@@ -4,15 +4,15 @@ ukb21942_d='/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942'
 tmp_ukb21942_d='/tmp/kellis/ukb21942'
 
 # BOLT-LMM specific paths
-# Update these paths based on your BOLT-LMM installation
-BOLT_LMM_DIR="/path/to/BOLT-LMM_v2.4.1"
+# BOLT-LMM v2.5 installation
+BOLT_LMM_DIR="/home/mabdel03/data/software/BOLT-LMM_v2.5"
 BOLT_TABLES_DIR="${BOLT_LMM_DIR}/tables"
 
-# LD scores for BOLT-LMM calibration (choose appropriate reference)
-# For European ancestry:
-LD_SCORES_FILE="${BOLT_TABLES_DIR}/LDSCORE.1000G_EUR.tab.gz"
+# LD scores for BOLT-LMM calibration
+# For European ancestry (GRCh38 coordinates, but matched by rsID/position)
+LD_SCORES_FILE="${BOLT_TABLES_DIR}/LDSCORE.1000G_EUR.GRCh38.tab.gz"
 
-# Genetic map for interpolation
+# Genetic map for interpolation (hg19/GRCh37 - matches UK Biobank coordinates)
 GENETIC_MAP_FILE="${BOLT_TABLES_DIR}/genetic_map_hg19_withX.txt.gz"
 
 # Model SNPs for genetic relationship matrix

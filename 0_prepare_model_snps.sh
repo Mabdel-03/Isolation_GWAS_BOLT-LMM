@@ -11,7 +11,7 @@ source "${REPODIR}/helpers/functions.sh"
 
 module load miniconda3/v4
 source /home/software/conda/miniconda3/bin/condainit
-conda activate /home/mabdel03/data/conda_envs/GWAS_env
+conda activate /home/mabdel03/data/conda_envs/bolt_lmm
 
 # Input genotype files
 genotype_dir="${ukb21942_d}/geno/ukb_genoHM3"

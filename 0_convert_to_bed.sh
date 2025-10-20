@@ -11,14 +11,14 @@ source "${REPODIR}/helpers/functions.sh"
 
 module load miniconda3/v4
 source /home/software/conda/miniconda3/bin/condainit
-conda activate /home/mabdel03/data/conda_envs/GWAS_env
+conda activate /home/mabdel03/data/conda_envs/bolt_lmm
 
 # Input and output paths
 genotype_dir="${ukb21942_d}/geno/ukb_genoHM3"
 input_pfile="${genotype_dir}/ukb_genoHM3"
 output_bfile="${genotype_dir}/ukb_genoHM3_bed"
 
-echo "Converting PLINK2 pgen to PLINK1 bed format for BOLT-LMM..."
+echo "Converting genotype files for BOLT-LMM v2.5..."
 echo "Input:  ${input_pfile}.pgen/pvar/psam"
 echo "Output: ${output_bfile}.bed/bim/fam"
 

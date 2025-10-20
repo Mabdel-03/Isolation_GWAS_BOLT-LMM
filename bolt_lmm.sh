@@ -64,11 +64,12 @@ if [ "${use_tmp_geno}" == "TRUE" ] ; then
     # copy genotype files into cache directory if using tmp
     bash ${REPODIR}/helpers/cache.pgen.sh ukb_genoHM3
     
-    # For BOLT-LMM, we need bed/bim/fam format
-    # If pgen files are in tmp, convert or use pre-converted bed files
-    genotype_bfile=${tmp_ukb21942_d}/geno/ukb_genoHM3/ukb_genoHM3
+    # For BOLT-LMM, we need bed/bim/fam format (converted from pgen)
+    # Use the _bed suffix for converted files
+    genotype_bfile=${tmp_ukb21942_d}/geno/ukb_genoHM3/ukb_genoHM3_bed
 else
-    genotype_bfile=${ukb21942_d}/geno/ukb_genoHM3/ukb_genoHM3
+    # Use bed format files (converted from pgen via 0_convert_to_bed.sh)
+    genotype_bfile=${ukb21942_d}/geno/ukb_genoHM3/ukb_genoHM3_bed
 fi
 
 # Model SNPs file (for computing genetic relationship matrix)
@@ -77,13 +78,11 @@ fi
 model_snps_file=${ukb21942_d}/geno/ukb_genoHM3/ukb_genoHM3_modelSNPs.txt
 
 # LD scores table (for calibration)
-# BOLT-LMM distribution usually includes tables for different reference panels
-# Adjust path based on your BOLT-LMM installation
-ld_scores_dir="/path/to/BOLT-LMM/tables"
-ld_scores_file="${ld_scores_dir}/LDSCORE.1000G_EUR.tab.gz"
+# BOLT-LMM v2.5 installation path
+ld_scores_file="/home/mabdel03/data/software/BOLT-LMM_v2.5/tables/LDSCORE.1000G_EUR.GRCh38.tab.gz"
 
-# Genetic map for interpolation
-genetic_map_file="${ld_scores_dir}/genetic_map_hg19_withX.txt.gz"
+# Genetic map for interpolation (hg19/GRCh37 - matches UK Biobank coordinates)
+genetic_map_file="/home/mabdel03/data/software/BOLT-LMM_v2.5/tables/genetic_map_hg19_withX.txt.gz"
 
 ####################################################################
 # main
