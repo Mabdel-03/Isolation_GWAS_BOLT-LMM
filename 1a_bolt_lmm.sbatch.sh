@@ -22,7 +22,8 @@ batch_size=1 # the number of jobs executed in an array task in SLURM.
 
 # BOLT-LMM requires more resources than PLINK
 # Increased memory and threads for BOLT-LMM
-sbatch_resources_str='-p normal --mem=40000 --ntasks=8 --nodes=1 --time=6-23:55:00 --exclude=b[1-4],c[5-22] --nice=200000'
+# Using kellis partition as requested
+sbatch_resources_str='-p kellis --mem=45000 --cpus-per-task=8 --nodes=1 --time=12:00:00'
 # http://rous.mit.edu/index.php/Luria#User_job_limitations
 
 # log directory
