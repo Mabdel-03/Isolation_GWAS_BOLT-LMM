@@ -50,7 +50,7 @@ plink2 \
     --maf 0.005 \
     --geno 0.10 \
     --hwe 1e-5 0.001 keep-fewhet \
-    --indep-pairwise 1000 50 0.2 \
+    --indep-pairwise 1000 50 0.5 \
     --out ${output_prefix} \
     --threads 8 \
     --memory 60000

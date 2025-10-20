@@ -50,23 +50,24 @@ if [ -s "${output_snplist}" ] ; then
 fi
 
 # Create LD-pruned SNP list
-# Criteria for model SNPs (relaxed to get ~500K SNPs):
-# - MAF >= 0.5% (--maf 0.005) - relaxed to include more common variants
-# - Missingness < 10% (--geno 0.10) - relaxed for model SNPs
+# Criteria for model SNPs (optimized for HM3 variant set):
+# - MAF >= 0.5% (--maf 0.005)
+# - Missingness < 10% (--geno 0.10)
 # - HWE with sample-size adjustment (--hwe 1e-5 0.001 keep-fewhet)
-#   This uses a less strict filter appropriate for large sample sizes
-#   Removes variants with heterozygosity excess only
-# - LD pruning: window=1000kb, step=50, r2<0.2 (--indep-pairwise 1000 50 0.2)
-#   Relaxed from r2<0.1 to r2<0.2 to retain more SNPs
+# - LD pruning: window=1000kb, step=50, r2<0.5 (--indep-pairwise 1000 50 0.5)
+#   Relaxed to r2<0.5 to retain sufficient SNPs from HM3 set
 # - Autosomes only (--chr 1-22)
 #
-# Note: Model SNPs don't need to be as strictly filtered as analysis SNPs
-# They're used for estimating relatedness, not for association testing
+# Note: For GRM computation in large biobank datasets, r2<0.5 is acceptable
+# Model SNPs don't need strict LD independence - moderate LD is fine
+# Previous attempt with r2<0.2 yielded only 243K SNPs (too few)
+# BOLT-LMM recommends 400K-600K SNPs for optimal GRM estimation
 
 echo "Running LD pruning to select model SNPs..."
 echo "This may take a while..."
 echo "Memory allocated: ${SLURM_MEM_PER_NODE}MB"
 echo "Target: 400K-600K model SNPs for GRM computation"
+echo "Starting with ~1.3M HM3 variants after QC filters"
 
 plink2 \
     --pfile ${genotype_pfile} vzs \
@@ -74,7 +75,7 @@ plink2 \
     --maf 0.005 \
     --geno 0.10 \
     --hwe 1e-5 0.001 keep-fewhet \
-    --indep-pairwise 1000 50 0.2 \
+    --indep-pairwise 1000 50 0.5 \
     --out ${output_prefix} \
     --threads ${SLURM_CPUS_PER_TASK} \
     --memory ${SLURM_MEM_PER_NODE}
