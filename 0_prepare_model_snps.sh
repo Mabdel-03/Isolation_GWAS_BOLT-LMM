@@ -49,11 +49,11 @@ plink2 \
     --chr 1-22 \
     --maf 0.01 \
     --geno 0.05 \
-    --hwe 1e-6 \
+    --hwe 1e-5 0.001 keep-fewhet \
     --indep-pairwise 1000 50 0.1 \
     --out ${output_prefix} \
     --threads 8 \
-    --memory 30000
+    --memory 60000
 
 # The above command creates two files:
 # - ${output_prefix}.prune.in  (SNPs to keep)

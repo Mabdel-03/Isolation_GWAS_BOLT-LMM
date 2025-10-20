@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=model_snps
 #SBATCH --partition=kellis
-#SBATCH --mem=32000
+#SBATCH --mem=64000
 #SBATCH --cpus-per-task=8
-#SBATCH --time=1:30:00
+#SBATCH --time=2:00:00
 #SBATCH --output=%x.%j.out
 #SBATCH --error=%x.%j.err
 
@@ -53,19 +53,22 @@ fi
 # Criteria:
 # - MAF >= 1% (--maf 0.01)
 # - Missingness < 5% (--geno 0.05)  
-# - HWE p-value > 1e-6 (--hwe 1e-6)
+# - HWE with sample-size adjustment (--hwe 1e-5 0.001 keep-fewhet)
+#   This uses a less strict filter appropriate for large sample sizes
+#   Removes variants with heterozygosity excess only
 # - LD pruning: window=1000kb, step=50, r2<0.1 (--indep-pairwise 1000 50 0.1)
 # - Autosomes only (--chr 1-22)
 
 echo "Running LD pruning to select model SNPs..."
 echo "This may take a while..."
+echo "Memory allocated: ${SLURM_MEM_PER_NODE}MB"
 
 plink2 \
     --pfile ${genotype_pfile} vzs \
     --chr 1-22 \
     --maf 0.01 \
     --geno 0.05 \
-    --hwe 1e-6 \
+    --hwe 1e-5 0.001 keep-fewhet \
     --indep-pairwise 1000 50 0.1 \
     --out ${output_prefix} \
     --threads ${SLURM_CPUS_PER_TASK} \
