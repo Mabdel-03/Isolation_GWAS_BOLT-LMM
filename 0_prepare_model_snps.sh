@@ -47,10 +47,10 @@ echo "This may take a while..."
 plink2 \
     --pfile ${genotype_pfile} vzs \
     --chr 1-22 \
-    --maf 0.01 \
-    --geno 0.05 \
+    --maf 0.005 \
+    --geno 0.10 \
     --hwe 1e-5 0.001 keep-fewhet \
-    --indep-pairwise 1000 50 0.1 \
+    --indep-pairwise 1000 50 0.2 \
     --out ${output_prefix} \
     --threads 8 \
     --memory 60000

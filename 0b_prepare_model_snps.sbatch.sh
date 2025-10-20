@@ -50,26 +50,31 @@ if [ -s "${output_snplist}" ] ; then
 fi
 
 # Create LD-pruned SNP list
-# Criteria:
-# - MAF >= 1% (--maf 0.01)
-# - Missingness < 5% (--geno 0.05)  
+# Criteria for model SNPs (relaxed to get ~500K SNPs):
+# - MAF >= 0.5% (--maf 0.005) - relaxed to include more common variants
+# - Missingness < 10% (--geno 0.10) - relaxed for model SNPs
 # - HWE with sample-size adjustment (--hwe 1e-5 0.001 keep-fewhet)
 #   This uses a less strict filter appropriate for large sample sizes
 #   Removes variants with heterozygosity excess only
-# - LD pruning: window=1000kb, step=50, r2<0.1 (--indep-pairwise 1000 50 0.1)
+# - LD pruning: window=1000kb, step=50, r2<0.2 (--indep-pairwise 1000 50 0.2)
+#   Relaxed from r2<0.1 to r2<0.2 to retain more SNPs
 # - Autosomes only (--chr 1-22)
+#
+# Note: Model SNPs don't need to be as strictly filtered as analysis SNPs
+# They're used for estimating relatedness, not for association testing
 
 echo "Running LD pruning to select model SNPs..."
 echo "This may take a while..."
 echo "Memory allocated: ${SLURM_MEM_PER_NODE}MB"
+echo "Target: 400K-600K model SNPs for GRM computation"
 
 plink2 \
     --pfile ${genotype_pfile} vzs \
     --chr 1-22 \
-    --maf 0.01 \
-    --geno 0.05 \
+    --maf 0.005 \
+    --geno 0.10 \
     --hwe 1e-5 0.001 keep-fewhet \
-    --indep-pairwise 1000 50 0.1 \
+    --indep-pairwise 1000 50 0.2 \
     --out ${output_prefix} \
     --threads ${SLURM_CPUS_PER_TASK} \
     --memory ${SLURM_MEM_PER_NODE}
