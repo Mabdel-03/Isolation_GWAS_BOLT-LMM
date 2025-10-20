@@ -83,9 +83,9 @@ The pipeline consists of several stages executed on high-performance computing i
     ┌───────────────────────────────────────────┐
     │  Step 2: Model SNP Selection              │
     │  Script: 0b_prepare_model_snps.sbatch.sh │
-    │  Process: LD pruning (r² < 0.1)          │
+    │  Process: LD pruning (r² < 0.5)          │
     │  Output: ~500K SNPs for GRM              │
-    │  Time:   ~20-40 minutes                   │
+    │  Time:   ~15-30 minutes                   │
     └───────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
