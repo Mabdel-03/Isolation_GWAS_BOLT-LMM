@@ -1,0 +1,62 @@
+name: bolt_lmm
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  # Python and core packages
+  - python=3.10
+  
+  # Genetics/Bioinformatics tools
+  - plink2                    # PLINK2 for genotype file conversion and QC
+  - bcftools                  # VCF/BCF manipulation
+  - samtools                  # SAM/BAM file manipulation
+  - htslib                    # High-throughput sequencing library
+  
+  # Python data science stack
+  - pandas>=1.5.0             # Data manipulation
+  - numpy>=1.23.0             # Numerical computing
+  - scipy>=1.9.0              # Scientific computing
+  - matplotlib>=3.6.0         # Plotting
+  - seaborn>=0.12.0           # Statistical visualization
+  - jupyter                   # Jupyter notebooks
+  - notebook                  # Jupyter notebook interface
+  - scikit-learn>=1.1.0       # Machine learning utilities
+  - statsmodels>=0.13.0       # Statistical modeling
+  
+  # R and R packages
+  - r-base=4.2                # R programming language
+  - r-essentials              # Essential R packages
+  - r-tidyverse               # Data manipulation (dplyr, ggplot2, etc.)
+  - r-data.table              # Fast data manipulation
+  - r-ggplot2                 # Plotting
+  - r-devtools                # R package development tools
+  
+  # Compression libraries
+  - zlib                      # Compression
+  - gzip                      # Gzip compression
+  - bzip2                     # Bzip2 compression
+  - xz                        # XZ compression
+  
+  # Additional utilities (optional but useful)
+  - parallel                  # GNU parallel for job parallelization
+  - pigz                      # Parallel gzip
+  
+  # Python packages via pip (if needed)
+  # - pip:
+  #   - any-additional-packages
+
+# Notes:
+# - BOLT-LMM must be installed separately (not available via conda)
+# - Download from: https://alkesgroup.broadinstitute.org/BOLT-LMM/
+# 
+# Installation:
+#   conda env create -f environment.yml -p /path/to/conda_envs/bolt_lmm
+#
+# Activation:
+#   conda activate /path/to/conda_envs/bolt_lmm
+#
+# Update:
+#   conda env update -f environment.yml -p /path/to/conda_envs/bolt_lmm --prune
+
