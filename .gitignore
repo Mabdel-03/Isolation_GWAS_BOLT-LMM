@@ -1,0 +1,123 @@
+# Git ignore file for BOLT-LMM GWAS analysis
+
+# Data files - DO NOT COMMIT
+*.pgen
+*.pvar
+*.psam
+*.bed
+*.bim
+*.fam
+*.bgen
+*.sample
+*.vcf
+*.vcf.gz
+*.bcf
+
+# Phenotype and covariate files - DO NOT COMMIT
+*.tsv
+*.tsv.gz
+*.csv
+*.csv.gz
+*.txt.gz
+pheno/
+sqc/
+
+# GWAS results - DO NOT COMMIT (too large)
+*.stats
+*.stats.gz
+*.glm.*
+*.linear
+*.logistic
+*.assoc
+*.qassoc
+
+# BOLT-LMM specific outputs - DO NOT COMMIT
+*.log
+*.log.gz
+*.dosage
+*.predBetasFile
+
+# Model files - DO NOT COMMIT (large)
+*_modelSNPs.txt
+*.prune.in
+*.prune.out
+
+# Extract/filter files (generated)
+*.extract.txt
+*.keep
+*.remove
+
+# SLURM logs - DO NOT COMMIT
+slurm-*.out
+slurm-*.err
+.slurm_logs/
+**/slurm_logs/
+*.jobs.*.sh
+
+# Output directories with results - DO NOT COMMIT
+Day_NoPCs/
+Day_10PCs/
+pop_10PCs/
+pop_10PCs_no_phequantnorm/
+UKB_18PCs/
+var_split/
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+.cache/
+
+# LD scores and genetic maps (large, downloaded separately)
+LDSCORE.*.tab.gz
+genetic_map_*.txt.gz
+
+# System files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+._.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+*.code-workspace
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+
+# R
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# Compressed archives (usually data)
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+*.zst
+
+# Job monitoring
+*.jobs.txt
+
+# Keep structure but ignore contents
+results/.gitkeep
+logs/.gitkeep
+
+# But DO include example/template files
+!example_*.tsv
+!template_*.sh
+
