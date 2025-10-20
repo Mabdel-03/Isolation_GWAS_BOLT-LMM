@@ -1,7 +1,8 @@
 #!/bin/bash
-set -beEuo pipefail
+set -beEo pipefail
 
 # Script to prepare model SNPs for BOLT-LMM
+# Note: Removed -u flag due to Qt conda package activation issues
 # Model SNPs are a subset of common, well-imputed variants used to compute the genetic relationship matrix
 
 REPODIR="/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942"

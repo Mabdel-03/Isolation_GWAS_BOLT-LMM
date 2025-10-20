@@ -1,5 +1,7 @@
 #!/bin/bash
-set -beEuo pipefail
+set -beEo pipefail
+
+# Note: Removed -u flag due to Qt conda package activation issues
 
 # Hardcode the top-level repo directory:
 REPODIR="/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942"

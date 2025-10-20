@@ -1,8 +1,9 @@
 #!/bin/bash
-set -beEuo pipefail
+set -beEo pipefail
 
 # Script to convert PLINK2 pgen files to PLINK1 bed/bim/fam format for BOLT-LMM
 # BOLT-LMM requires bed/bim/fam format
+# Note: Removed -u flag due to Qt conda package activation issues
 
 REPODIR="/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942"
 ukb21942_d='/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942'
