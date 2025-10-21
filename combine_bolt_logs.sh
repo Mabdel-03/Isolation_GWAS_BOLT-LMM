@@ -4,7 +4,7 @@ set -beEuo pipefail
 # Script to combine BOLT-LMM log files from variant splits
 
 REPODIR="/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942"
-ukb21942_d='/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942'
+SRCDIR="/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942/Isolation_GWAS_BOLT-LMM"
 
 if [ $# -ne 3 ] ; then
     echo "Usage: $0 <analysis_name> <covar_str> <keep_set>" >&2
@@ -15,8 +15,9 @@ analysis_name=$1
 covar_str=$2
 keep_set=$3
 
-input_dir="${ukb21942_d}/isolation_run_control_BOLT/${covar_str}/${keep_set}/var_split"
-output_dir="${ukb21942_d}/isolation_run_control_BOLT/${covar_str}/${keep_set}"
+# Use results directory within Git repository
+input_dir="${SRCDIR}/results/${covar_str}/${keep_set}/var_split"
+output_dir="${SRCDIR}/results/${covar_str}/${keep_set}"
 
 if [ ! -d "${output_dir}" ] ; then
     mkdir -p "${output_dir}"

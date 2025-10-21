@@ -55,6 +55,7 @@ slurm-*.err
 *.jobs.*.sh
 
 # Output directories with results - DO NOT COMMIT
+results/
 Day_NoPCs/
 Day_10PCs/
 pop_10PCs/

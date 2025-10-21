@@ -37,8 +37,8 @@ echo ""
 bash bolt_lmm.sh isolation_run_control BOLT 5,6,9 8 45000 Day_NoPCs EUR 1
 
 # Check if test succeeded
-ukb21942_d='/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942'
-test_output_dir="${ukb21942_d}/isolation_run_control_BOLT/Day_NoPCs/EUR/var_split"
+SRCDIR="/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942/Isolation_GWAS_BOLT-LMM"
+test_output_dir="${SRCDIR}/results/Day_NoPCs/EUR/var_split"
 
 echo ""
 echo "========================================"

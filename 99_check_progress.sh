@@ -1,9 +1,9 @@
 #!/bin/bash
-set -beEuo pipefail
+set -beEo pipefail
 
 # Script to check the progress of BOLT-LMM analysis
 
-ukb21942_d='/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942'
+SRCDIR="/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942/Isolation_GWAS_BOLT-LMM"
 
 echo "========================================"
 echo "BOLT-LMM Analysis Progress Check"
@@ -16,7 +16,7 @@ for covar_str in Day_NoPCs Day_10PCs ; do
         echo "Covariate Set: ${covar_str}, Population: ${keep_set}"
         echo "----------------------------------------"
         
-        base_dir="${ukb21942_d}/isolation_run_control_BOLT/${covar_str}/${keep_set}"
+        base_dir="${SRCDIR}/results/${covar_str}/${keep_set}"
         var_split_dir="${base_dir}/var_split"
         
         if [ ! -d "${var_split_dir}" ] ; then

@@ -52,7 +52,9 @@ echo "Processing variant split: ${var_split}"
 # output files
 ####################################################################
 
-out_base=${ukb21942_d}/isolation_run_control_BOLT/${covar_str}/${keep_set}/var_split/bolt_${analysis_name}.${var_split}
+# Output within the Git repository directory under results/
+# This keeps all analysis outputs centralized in one location
+out_base=${SRCDIR}/results/${covar_str}/${keep_set}/var_split/bolt_${analysis_name}.${var_split}
 
 if [ ! -d $(dirname "${out_base}") ] ; then mkdir -p $(dirname "${out_base}") ; fi
 
