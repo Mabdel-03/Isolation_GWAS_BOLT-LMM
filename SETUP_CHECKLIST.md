@@ -234,8 +234,8 @@ Per job:
 - **Disk**: ~50GB for temporary files
 
 Total analysis:
-- **138 jobs** (69 splits × 2 covariate sets)
-- **~20-30 hours** wall time with array parallelization
+- **6 jobs** (3 phenotypes × 2 covariate sets)
+- **~1-2 hours** wall time (all run concurrently)
 
 ## Output Files
 

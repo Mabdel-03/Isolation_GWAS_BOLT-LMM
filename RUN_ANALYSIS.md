@@ -80,12 +80,12 @@ grep "TEST PASSED" bolt_test_simple.*.out
 
 ---
 
-### Step 4: Full Analysis (138 Jobs)
+### Step 5: Full Analysis (6 Jobs - Simplified)
 
-**Script:** `1a_bolt_lmm.sbatch.sh`  
-**Resources per job:** 45GB RAM, 8 CPUs, 12 hours  
+**Script:** `1_run_bolt_lmm.sbatch.sh`  
+**Resources per job:** 150GB RAM, 100 tasks, 47 hours  
 **Partition:** kellis  
-**Total jobs:** 138 (69 variant splits × 2 covariate sets)
+**Total jobs:** 6 (3 phenotypes × 2 covariate sets)
 
 ```bash
 # Submit all jobs (only after test passes!)
@@ -147,10 +147,11 @@ bash 1b_combine_bolt_output.sh
 
 | Step | Script | RAM | CPUs | Time | Partition |
 |------|--------|-----|------|------|-----------|
-| 1. Convert | `0a_convert_to_bed.sbatch.sh` | 32GB | 8 | 2h | kellis |
-| 2. Model SNPs | `0b_prepare_model_snps.sbatch.sh` | 32GB | 8 | 1.5h | kellis |
-| 3. Test | `0c_test_run.sbatch.sh` | 45GB | 8 | 6h | kellis |
-| 4. Full (×138) | `1a_bolt_lmm.sbatch.sh` | 45GB | 8 | 12h | kellis |
+| 1. Convert | `0a_convert_to_bed.sbatch.sh` | 32GB | 8 | 2h | kellis | Chr 1-22 only |
+| 2. EUR filter | `create_remove_file.sh` | - | - | <1s | - | EUR.remove |
+| 3. Model SNPs | `0b_prepare_model_snps.sbatch.sh` | 80GB | 8 | 2h | kellis | r²<0.5 |
+| 4. Test | `0c_test_simplified.sbatch.sh` | 150GB | 100 | 47h | kellis | Full genome |
+| 5. Full (×6) | `1_run_bolt_lmm.sbatch.sh` | 150GB | 100 | 47h | kellis | Concurrent |
 
 ---
 
