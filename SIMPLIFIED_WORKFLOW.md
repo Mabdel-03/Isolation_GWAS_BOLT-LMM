@@ -33,13 +33,17 @@ This is the **streamlined workflow** - much simpler and more efficient than the 
 cd /home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942/Isolation_GWAS_BOLT-LMM
 conda activate /home/mabdel03/data/conda_envs/bolt_lmm
 
-# 1a. Convert genotypes to bed format (autosomes only)
+# 1a. Convert genotypes to bed format (autosomes only: chr 1-22)
 sbatch 0a_convert_to_bed.sbatch.sh
-# Wait ~5-10 min, creates ukb_genoHM3_bed.bed/bim/fam (~145GB)
+# Wait ~5-10 min, creates ukb_genoHM3_bed.bed/bim/fam (~145GB, autosomes only)
 
-# 1b. Create model SNPs (after 1a completes)
+# 1b. Create EUR.remove file from EUR.keep (BOLT-LMM uses --remove, not --keep)
+bash create_remove_file.sh
+# Takes <1 second, creates EUR.remove (samples to exclude)
+
+# 1c. Create model SNPs (after 1a completes)
 sbatch 0b_prepare_model_snps.sbatch.sh
-# Wait ~15-30 min, creates ~444K SNPs for GRM
+# Wait ~15-30 min, creates ~444K SNPs for GRM (r²<0.5, MAF≥0.5%)
 ```
 
 ### Step 2: Test Run (Required!)
@@ -125,13 +129,16 @@ results/
 | Step | Script | RAM | Tasks | Time | Jobs |
 |------|--------|-----|-------|------|------|
 | Convert | `0a_convert_to_bed.sbatch.sh` | 32GB | 8 | ~10m | 1 |
+| Create .remove | `create_remove_file.sh` | - | - | <1s | - |
 | Model SNPs | `0b_prepare_model_snps.sbatch.sh` | 80GB | 8 | ~30m | 1 |
 | Test | `0c_test_simplified.sbatch.sh` | 150GB | 100 | ~2h | 1 |
 | **Full** | `1_run_bolt_lmm.sbatch.sh` | **150GB** | **100** | ~2h each | **6** |
 
-**Total**: 8 jobs (2 preprocessing + 1 test + 1 array of 6)  
+**Total**: 9 steps (3 preprocessing + 1 test + 1 array of 6)  
 **Wall time**: ~1 day (all 6 can run concurrently)  
 **Vs. old approach**: 138 jobs over 3-4 days!
+
+**Key**: The `.remove` file filters phenotype data to EUR ancestry only (BOLT-LMM requirement)
 
 ---
 
@@ -174,16 +181,17 @@ cd /home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942/Isolation_
 # Activate environment
 conda activate /home/mabdel03/data/conda_envs/bolt_lmm
 
-# Preprocessing (if not done already)
-sbatch 0a_convert_to_bed.sbatch.sh      # Wait ~10 min
-sbatch 0b_prepare_model_snps.sbatch.sh  # Wait ~30 min
+# Preprocessing (one-time setup)
+sbatch 0a_convert_to_bed.sbatch.sh      # Convert genotypes (chr 1-22), ~10 min
+bash create_remove_file.sh               # Create EUR.remove from EUR.keep, <1 sec
+sbatch 0b_prepare_model_snps.sbatch.sh  # Create ~444K model SNPs, ~30 min
 
-# Test (REQUIRED)
-sbatch 0c_test_simplified.sbatch.sh     # Wait ~2 hours
+# Test (REQUIRED - validates EUR filtering and full pipeline)
+sbatch 0c_test_simplified.sbatch.sh     # Full genome test with EUR samples, ~2 hours
 # Check: grep "TEST PASSED" bolt_test_simple.*.out
 
 # Full analysis (if test passes)
-sbatch 1_run_bolt_lmm.sbatch.sh         # Submits 6 jobs
+sbatch 1_run_bolt_lmm.sbatch.sh         # Submits 6 jobs (EUR-filtered)
 
 # Monitor
 squeue -u $USER

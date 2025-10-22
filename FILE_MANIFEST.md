@@ -44,7 +44,22 @@ This directory contains a complete BOLT-LMM v2.5 GWAS analysis pipeline for bina
 **Usage**: `bash combine_bolt_sumstats.sh <analysis_name> <covar_str> <keep_set> <trait>`  
 **Example**: `bash combine_bolt_sumstats.sh isolation_run_control Day_NoPCs EUR Loneliness`
 
-## Setup/Preparation Scripts (SLURM Batch Jobs)
+## Setup/Preparation Scripts
+
+### `create_remove_file.sh` ⭐ REQUIRED SETUP
+**Purpose**: Convert EUR.keep to EUR.remove for BOLT-LMM sample filtering  
+**Usage**: `bash create_remove_file.sh`  
+**When to run**: Once, after converting genotypes to bed format  
+**Runtime**: <1 second  
+**What it does**:
+- Reads EUR.keep (EUR ancestry samples to keep)
+- Reads .fam file (all samples)
+- Creates EUR.remove (non-EUR samples to exclude)
+- BOLT-LMM uses --remove, not --keep (PLINK2-specific)  
+**Output**: `sqc/population.20220316/EUR.remove`  
+**Why needed**: Phenotype files contain all ancestries; this filters to EUR only
+
+## Preprocessing Scripts (SLURM Batch Jobs)
 
 ### `0a_convert_to_bed.sbatch.sh` ⭐ STEP 1
 **Purpose**: Converts PLINK2 pgen files to PLINK1 bed format for BOLT-LMM  
@@ -324,31 +339,35 @@ isolation_run_control_BOLT/
 
 ### Recommended Workflow (Using Batch Scripts)
 
-1. **Preprocessing** (run once, ~1-2 hours total):
+1. **Preprocessing** (run once, ~1 hour total):
    ```bash
-   sbatch 0a_convert_to_bed.sbatch.sh       # Step 1: Convert genotypes
-   # Wait for completion, then:
-   sbatch 0b_prepare_model_snps.sbatch.sh   # Step 2: Create model SNPs
+   sbatch 0a_convert_to_bed.sbatch.sh       # Step 1: Convert genotypes (chr 1-22)
+   # Wait ~10 min, then:
+   bash create_remove_file.sh                # Step 2: Create EUR.remove
+   sbatch 0b_prepare_model_snps.sbatch.sh   # Step 3: Create model SNPs
+   # Wait ~30 min
    ```
 
-2. **Validation** (critical checkpoint, ~1-3 hours):
+2. **Validation** (critical checkpoint, ~1-2 hours):
    ```bash
-   # Wait for Step 2 completion, then:
-   sbatch 0c_test_run.sbatch.sh             # Step 3: Test pipeline
+   # Wait for preprocessing completion, then:
+   sbatch 0c_test_simplified.sbatch.sh      # Step 4: Test with EUR filtering
+   # Runs full genome for Loneliness + Day_NoPCs
    # Check for "TEST PASSED" in output before proceeding!
    ```
 
-3. **Full Analysis** (1-2 days):
+3. **Full Analysis** (~1-2 hours, 6 jobs concurrently):
    ```bash
    # Only if test passed:
-   bash 1a_bolt_lmm.sbatch.sh               # Step 4: Submit all 138 jobs
-   bash 99_check_progress.sh                # Monitor progress
+   sbatch 1_run_bolt_lmm.sbatch.sh          # Step 5: Submit 6 jobs
+   squeue -u $USER                           # Monitor
    ```
 
-4. **Post-Processing** (1-2 hours):
+4. **Results Ready** (no post-processing needed!):
    ```bash
-   # After all 138 jobs complete:
-   bash 1b_combine_bolt_output.sh           # Step 5: Combine results
+   # View final GWAS results:
+   ls -lh results/Day_NoPCs/EUR/bolt_*.stats.gz
+   ls -lh results/Day_10PCs/EUR/bolt_*.stats.gz
    ```
 
 ### Alternative: Interactive Workflow (Legacy)
