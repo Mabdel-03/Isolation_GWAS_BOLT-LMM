@@ -58,39 +58,48 @@ ld_scores_file="${BOLT_TABLES_DIR}/LDSCORE.1000G_EUR.tab.gz"
 genetic_map_file="${BOLT_TABLES_DIR}/genetic_map_hg19_withX.txt.gz"
 ```
 
-## ✓ Step 3: Convert Genotype Files to BED Format
+## ✓ Step 3: Convert Genotype Files to BED Format (Autosomes Only)
 
-BOLT-LMM requires PLINK1 bed/bim/fam format (not pgen):
-
-```bash
-cd isolation_run_control_BOLT
-bash 0_convert_to_bed.sh
-```
-
-This creates: `geno/ukb_genoHM3/ukb_genoHM3_bed.{bed,bim,fam}`
-
-**Important**: After conversion, update `bolt_lmm.sh` line ~80:
+BOLT-LMM requires PLINK1 bed/bim/fam format with standard chromosome codes:
 
 ```bash
-# Change from:
-genotype_bfile=${ukb21942_d}/geno/ukb_genoHM3/ukb_genoHM3
+cd Isolation_GWAS_BOLT-LMM
 
-# To:
-genotype_bfile=${ukb21942_d}/geno/ukb_genoHM3/ukb_genoHM3_bed
+# Submit as batch job (32GB RAM, 8 tasks, ~5-10 min)
+sbatch 0a_convert_to_bed.sbatch.sh
+
+# Monitor
+tail -f convert_to_bed.*.out
 ```
+
+**CRITICAL**: This converts **autosomes only (chr 1-22)**
+- BOLT-LMM doesn't recognize MT, X, Y, XY chromosome codes
+- Including these will cause: "ERROR: Unknown chromosome code"
+- Output: `geno/ukb_genoHM3/ukb_genoHM3_bed.{bed,bim,fam}` (~145GB, autosomes only)
+
+**No manual editing needed** - paths are pre-configured!
 
 ## ✓ Step 4: Create Model SNPs File
 
 Generate LD-pruned SNPs for computing the genetic relationship matrix:
 
 ```bash
-cd isolation_run_control_BOLT
-bash 0_prepare_model_snps.sh
+# Submit as batch job (80GB RAM, 8 tasks, ~15-30 min)
+sbatch 0b_prepare_model_snps.sbatch.sh
+
+# Monitor
+tail -f model_snps.*.out
 ```
 
-This creates: `geno/ukb_genoHM3/ukb_genoHM3_modelSNPs.txt`
+**Parameters** (optimized for HM3 data):
+- MAF ≥0.5%, missingness <10%
+- HWE: sample-size adjusted (--hwe 1e-5 0.001 keep-fewhet)
+- LD pruning: **r²<0.5** (relaxed for HM3 variant set)
+- Memory: **80GB** (required for ~500K samples)
 
-Expected: 300K-700K SNPs
+**Output**: `geno/ukb_genoHM3/ukb_genoHM3_modelSNPs.txt`  
+**Expected**: **~444,000 SNPs** (verified working)  
+**Range**: 400K-600K SNPs (optimal for BOLT-LMM)
 
 ## ✓ Step 5: Check Population Files
 
@@ -139,20 +148,31 @@ If column names differ, update `bolt_lmm.sh` lines ~125-145
 
 **CRITICAL**: Ensure phenotypes are binary (0/1 or 1/2 coding). BOLT-LMM will automatically use liability threshold model.
 
-## ✓ Step 7: Test Run (Optional but Recommended)
+## ✓ Step 7: Test Run (CRITICAL - Required!)
 
-Test with a single variant split before submitting all jobs:
+Test the complete pipeline before submitting all jobs:
 
 ```bash
-cd isolation_run_control_BOLT
+cd Isolation_GWAS_BOLT-LMM
 
-# Test run for variant split 1, Day_NoPCs, EUR
-bash bolt_lmm.sh isolation_run_control BOLT 5,6,9 8 40000 Day_NoPCs EUR 1
+# Submit test as SLURM batch job (100GB RAM, 100 CPUs, 47h limit)
+sbatch 0c_test_run.sbatch.sh
+
+# Monitor
+tail -f bolt_test.*.out
+
+# Check for success
+grep "TEST PASSED" bolt_test.*.out
 ```
 
-Check output:
-- `isolation_run_control_BOLT/Day_NoPCs/EUR/var_split/bolt_isolation_run_control.*.*.BOLT.stats.gz`
-- Look for errors in log files
+Check output (in Git repository):
+- `results/Day_NoPCs/EUR/var_split/bolt_isolation_run_control.*.Loneliness.BOLT.stats.gz`
+- `results/Day_NoPCs/EUR/var_split/bolt_isolation_run_control.*.FreqSoc.BOLT.stats.gz`
+- `results/Day_NoPCs/EUR/var_split/bolt_isolation_run_control.*.AbilityToConfide.BOLT.stats.gz`
+- Each should have corresponding .log.gz files
+- Total: 6 files (3 phenotypes × 2 file types)
+
+⚠️ **DO NOT proceed to full analysis unless you see "🎉 TEST PASSED!"**
 
 ## ✓ Step 8: Submit Full Analysis
 
