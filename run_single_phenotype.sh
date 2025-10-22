@@ -71,7 +71,6 @@ echo "Verifying input files..."
 for file in "${genotype_bfile}.bed" "${genotype_bfile}.bim" "${genotype_bfile}.fam" \
             "${ukb21942_d}/pheno/isolation_run_control.tsv.gz" \
             "${ukb21942_d}/sqc/sqc.20220316.tsv.gz" \
-            "${ukb21942_d}/sqc/population.20220316/${keep_set}.keep" \
             "${model_snps_file}" \
             "${ld_scores_file}" \
             "${genetic_map_file}"; do
@@ -82,30 +81,36 @@ for file in "${genotype_bfile}.bed" "${genotype_bfile}.bim" "${genotype_bfile}.f
 done
 echo "✓ All input files verified"
 echo ""
+echo "Note: Not using --keep or --remove filter"
+echo "BOLT-LMM will analyze all samples in phenotype file"
+echo "Ensure phenotype/covariate files are pre-filtered to EUR if needed"
+echo ""
 
 # Run BOLT-LMM
 echo "Starting BOLT-LMM analysis..."
 echo "This will analyze ~1.3M autosomal variants (full genome)"
 echo ""
 
-bolt \
-    --bfile=${genotype_bfile} \
-    --phenoFile=${ukb21942_d}/pheno/isolation_run_control.tsv.gz \
-    --phenoCol=${phenotype} \
-    --covarFile=${ukb21942_d}/sqc/sqc.20220316.tsv.gz \
-    --qCovarCol=${qcovar_cols} \
-    --covarCol=${covar_cols} \
-    --covarMaxLevels=30 \
-    --keep=${ukb21942_d}/sqc/population.20220316/${keep_set}.keep \
-    --modelSnps=${model_snps_file} \
-    --LDscoresFile=${ld_scores_file} \
-    --geneticMapFile=${genetic_map_file} \
-    --lmm \
-    --LDscoresMatchBp \
-    --numThreads=100 \
-    --statsFile=${out_file}.stats \
-    --verboseStats \
-    2>&1 | tee ${out_file}.log
+    # BOLT-LMM command
+    # Note: Not using --keep or --remove - phenotype/covariate files should already be EUR-filtered
+    # BOLT-LMM will analyze all samples present in phenotype file
+    bolt \
+        --bfile=${genotype_bfile} \
+        --phenoFile=${ukb21942_d}/pheno/isolation_run_control.tsv.gz \
+        --phenoCol=${phenotype} \
+        --covarFile=${ukb21942_d}/sqc/sqc.20220316.tsv.gz \
+        --qCovarCol=${qcovar_cols} \
+        --covarCol=${covar_cols} \
+        --covarMaxLevels=30 \
+        --modelSnps=${model_snps_file} \
+        --LDscoresFile=${ld_scores_file} \
+        --geneticMapFile=${genetic_map_file} \
+        --lmm \
+        --LDscoresMatchBp \
+        --numThreads=100 \
+        --statsFile=${out_file}.stats \
+        --verboseStats \
+        2>&1 | tee ${out_file}.log
 
 bolt_exit_code=$?
 
