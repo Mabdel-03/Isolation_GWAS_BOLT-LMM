@@ -2,32 +2,44 @@
 
 ## TL;DR - Run These Commands
 
+**All paths are pre-configured! Just run the scripts in order:**
+
 ```bash
-# 1. Navigate to the analysis directory
-cd /home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942/isolation_run_control_BOLT
+# 1. Navigate to YOUR analysis directory (inside Git repo)
+cd /home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942/Isolation_GWAS_BOLT-LMM
 
-# 2. Update paths in bolt_lmm.sh (lines 100-110)
-# - Set LD_SCORES_FILE to your BOLT-LMM tables directory
-# - Set GENETIC_MAP_FILE to your BOLT-LMM tables directory
-# - Set genotype_bfile path if using converted bed files
+# 2. Activate conda environment
+conda activate /home/mabdel03/data/conda_envs/bolt_lmm
 
-# 3. Convert genotypes to bed format (if needed)
-bash 0_convert_to_bed.sh
+# 3. Preprocessing Step 1: Convert genotypes (autosomes only, chr 1-22)
+sbatch 0a_convert_to_bed.sbatch.sh
+# Resources: 32GB, 8 tasks, ~5-10 min
+# Creates: ukb_genoHM3_bed.bed/bim/fam (~145GB, autosomes only)
 
-# 4. Create model SNPs for GRM
-bash 0_prepare_model_snps.sh
+# 4. Preprocessing Step 2: Create model SNPs (wait for step 3 to finish)
+sbatch 0b_prepare_model_snps.sbatch.sh  
+# Resources: 80GB, 8 tasks, ~15-30 min
+# Creates: ~444K SNPs (MAF≥0.5%, r²<0.5)
 
-# 5. Test with one variant split
-bash bolt_lmm.sh isolation_run_control BOLT 5,6,9 8 40000 Day_NoPCs EUR 1
+# 5. Test run - CRITICAL! (wait for step 4 to finish)
+sbatch 0c_test_run.sbatch.sh
+# Resources: 100GB, 100 tasks, 47h limit (runs 1-3h)
+# Tests all 3 phenotypes on full genome
+# Check for "TEST PASSED" before continuing!
 
-# 6. If test succeeds, submit all jobs
+# 6. Full analysis (only if test passes!)
 bash 1a_bolt_lmm.sbatch.sh
+# Submits 138 jobs: 100GB, 100 tasks, 47h each
 
 # 7. Monitor progress
+squeue -u $USER
 bash 99_check_progress.sh
 
-# 8. After completion, combine results
+# 8. Combine results (after all 138 jobs complete)
 bash 1b_combine_bolt_output.sh
+
+# 9. Results location
+ls -lh results/Day_NoPCs/EUR/
 ```
 
 ## What This Analysis Does
@@ -53,11 +65,15 @@ Using BOLT-LMM mixed models with:
 | Population structure | Explicit PC covariates | GRM + PC covariates |
 | Relatedness | Typically excluded | Properly modeled |
 | Trait type | Binary (0/1) | Binary with liability scale |
-| File format | pgen/pvar/psam | bed/bim/fam |
-| Memory | ~15GB | ~40GB |
+| File format | pgen/pvar/psam | bed/bim/fam (autosomes only) |
+| Chromosomes | 1-22, X, Y, MT | **1-22 only** (BOLT limitation) |
+| Memory | ~15GB | **100GB** |
+| CPUs | 2 | **100** |
 | Runtime | Faster | Slower (better modeling) |
+| Walltime | 6-12h | **47h** per job |
 | Effect size | Log odds ratio | Liability scale (approximates log OR) |
 | Output p-values | Standard | Calibrated with LD scores |
+| Output location | Scattered | **results/** in Git repo |
 
 ## Expected Runtime
 
