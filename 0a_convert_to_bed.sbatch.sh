@@ -63,8 +63,8 @@ plink2 \
     --chr 1-22 \
     --make-bed \
     --out ${output_bfile} \
-    --threads ${SLURM_CPUS_PER_TASK} \
-    --memory ${SLURM_MEM_PER_NODE}
+    --threads ${SLURM_NTASKS} \
+    --memory 32000
 
 # Verify output
 if [ -s "${output_bfile}.bed" ] && [ -s "${output_bfile}.bim" ] && [ -s "${output_bfile}.fam" ] ; then

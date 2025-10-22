@@ -77,8 +77,8 @@ plink2 \
     --hwe 1e-5 0.001 keep-fewhet \
     --indep-pairwise 1000 50 0.5 \
     --out ${output_prefix} \
-    --threads ${SLURM_CPUS_PER_TASK} \
-    --memory ${SLURM_MEM_PER_NODE}
+    --threads ${SLURM_NTASKS} \
+    --memory 80000
 
 # The above command creates two files:
 # - ${output_prefix}.prune.in  (SNPs to keep)
