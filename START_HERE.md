@@ -173,8 +173,8 @@ See [`BINARY_TRAITS_INFO.md`](BINARY_TRAITS_INFO.md) for detailed interpretation
 - **Covariate sets**: 2 (Day_NoPCs, Day_10PCs)
 - **Population**: EUR (European ancestry)
 - **Variant splits**: 69 (for parallelization)
-- **Total jobs**: 138 (69 × 2)
-- **Expected runtime**: 1-2 days with array jobs
+- **Total jobs**: 6 (3 phenotypes × 2 covariate sets)
+- **Expected runtime**: ~1 day (1-2 hours for analysis after preprocessing) with array jobs
 - **Output**: ~6 summary statistic files (2 covariate sets × 3 phenotypes)
 
 ## Common Questions

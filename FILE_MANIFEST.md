@@ -279,7 +279,8 @@ isolation_run_control_BOLT/
 │
 ├── 📜 Core Execution Scripts
 │   ├── bolt_lmm.sh                      # Main BOLT-LMM worker script
-│   ├── 1a_bolt_lmm.sbatch.sh            # SLURM: Submit 138 array jobs
+│   ├── 1_run_bolt_lmm.sbatch.sh         # SLURM: Submit 6 array jobs (RECOMMENDED)
+│   ├── 1a_bolt_lmm.sbatch.sh            # DEPRECATED: Old 138-job workflow
 │   ├── 1b_combine_bolt_output.sh        # Combine results orchestrator
 │   ├── combine_bolt_logs.sh             # Helper: merge log files
 │   └── combine_bolt_sumstats.sh         # Helper: merge statistics

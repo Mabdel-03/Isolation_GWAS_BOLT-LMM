@@ -29,14 +29,13 @@ sbatch 0c_test_run.sbatch.sh
 
 # 6. Full analysis (only if test passes!)
 bash 1a_bolt_lmm.sbatch.sh
-# Submits 138 jobs: 100GB, 100 tasks, 47h each
+# Submits 6 jobs: 150GB, 100 tasks, 47h limit each
 
-# 7. Monitor progress
+# 8. Monitor progress
 squeue -u $USER
-bash 99_check_progress.sh
 
-# 8. Combine results (after all 138 jobs complete)
-bash 1b_combine_bolt_output.sh
+# 9. Results ready! (no combining needed - outputs are final)
+ls -lh results/Day_NoPCs/EUR/bolt_*.stats.gz
 
 # 9. Results location
 ls -lh results/Day_NoPCs/EUR/
