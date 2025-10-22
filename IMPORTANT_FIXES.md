@@ -202,7 +202,7 @@ Results:      Isolation_GWAS_BOLT-LMM/results/
 Convert (0a):     32GB, 8 tasks, 2h
 Model SNPs (0b):  80GB, 8 tasks, 2h  
 Test (0c):        100GB, 100 tasks, 47h
-Full (1a):        100GB, 100 tasks, 47h per job × 138 jobs
+Full (1):         150GB, 100 tasks, 47h per job × 6 jobs
 ```
 
 ### Model SNP Parameters (Final)

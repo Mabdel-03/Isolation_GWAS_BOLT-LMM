@@ -53,9 +53,10 @@ Runs genome-wide association studies (GWAS) for 3 **binary** isolation-related p
 
 Using BOLT-LMM mixed models with:
 - 2 covariate sets (Day_NoPCs, Day_10PCs)
-- EUR population
-- 69 variant splits for parallelization
+- EUR population (filtered via EUR.remove file)
+- **6 jobs total** - each processes full genome
 - **Binary trait modeling** with liability threshold
+- No variant splitting (simplified workflow)
 
 ## Key Differences from PLINK Version
 
@@ -77,9 +78,9 @@ Using BOLT-LMM mixed models with:
 
 ## Expected Runtime
 
-- **Per variant split**: 6-12 hours
-- **Total jobs**: 138 (69 splits × 2 covariate sets)
-- **Wall time**: 1-2 days with array jobs (max 5 concurrent)
+- **Per job**: 1-2 hours (full genome analysis)
+- **Total jobs**: 6 (3 phenotypes × 2 covariate sets)
+- **Wall time**: ~1 day total (all 6 can run concurrently)
 
 ## File Requirements
 

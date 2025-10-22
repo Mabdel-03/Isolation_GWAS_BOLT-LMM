@@ -179,11 +179,12 @@ Check output (in Git repository):
 Once test run succeeds:
 
 ```bash
-cd isolation_run_control_BOLT
-bash 1a_bolt_lmm.sbatch.sh
+cd Isolation_GWAS_BOLT-LMM
+sbatch 1_run_bolt_lmm.sbatch.sh
 ```
 
-This submits 138 jobs (69 variant splits × 2 covariate sets)
+This submits 6 jobs (3 phenotypes × 2 covariate sets) as a SLURM array  
+All jobs run concurrently and process the full genome
 
 ## ✓ Step 9: Monitor Progress
 

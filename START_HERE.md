@@ -60,8 +60,8 @@ bash 0_prepare_model_snps.sh
 # 4. Test with one variant split
 bash bolt_lmm.sh isolation_run_control BOLT 5,6,9 8 40000 Day_NoPCs EUR 1
 
-# 5. Submit all 138 jobs
-bash 1a_bolt_lmm.sbatch.sh
+# 5. Submit all 6 jobs (old variant-split approach deprecated)
+# Use new simplified workflow instead - see SIMPLIFIED_WORKFLOW.md
 
 # 6. Monitor progress
 bash 99_check_progress.sh
