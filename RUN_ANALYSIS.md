@@ -35,10 +35,10 @@ tail -f convert_to_bed.*.out
 
 ---
 
-### Step 2: Create Model SNPs
+### Step 3: Create Model SNPs
 
 **Script:** `0b_prepare_model_snps.sbatch.sh`  
-**Resources:** 32GB RAM, 8 CPUs, 1.5 hours  
+**Resources:** 80GB RAM, 8 tasks, 2 hours  
 **Partition:** kellis
 
 ```bash
@@ -49,31 +49,34 @@ sbatch 0b_prepare_model_snps.sbatch.sh
 tail -f model_snps.*.out
 ```
 
-**Expected time:** 20-40 minutes  
-**Output:** `ukb_genoHM3_modelSNPs.txt` (~500K SNPs)
+**Expected time:** 15-30 minutes  
+**Output:** `ukb_genoHM3_modelSNPs.txt` (~444K SNPs)  
+**Parameters:** MAF≥0.5%, r²<0.5, HWE sample-size adjusted  
+**Why 80GB:** LD calculations with ~500K samples require substantial memory
 
 ---
 
-### Step 3: Test Run (CRITICAL!)
+### Step 4: Test Run (CRITICAL!)
 
-**Script:** `0c_test_run.sbatch.sh`  
-**Resources:** 45GB RAM, 8 CPUs, 6 hours  
+**Script:** `0c_test_simplified.sbatch.sh`  
+**Resources:** 150GB RAM, 100 tasks, 6 hours  
 **Partition:** kellis
 
 ```bash
-# Submit test job (after Step 2 completes)
-sbatch 0c_test_run.sbatch.sh
+# Submit test job (after Steps 1-3 complete)
+sbatch 0c_test_simplified.sbatch.sh
 
 # Monitor
-tail -f bolt_test.*.out
+tail -f bolt_test_simple.*.out
 
 # Check for success message
-grep "TEST PASSED" bolt_test.*.out
+grep "TEST PASSED" bolt_test_simple.*.out
 ```
 
-**Expected time:** 1-3 hours  
-**What it does:** Runs BOLT-LMM for all 3 phenotypes on variant split 1  
-**⚠️ IMPORTANT:** Do NOT proceed to Step 4 unless this passes!
+**Expected time:** 1-2 hours  
+**What it does:** Runs BOLT-LMM for Loneliness + Day_NoPCs on **full genome** with **EUR samples**  
+**Output:** `results/Day_NoPCs/EUR/bolt_Loneliness.Day_NoPCs.stats.gz` (complete GWAS result)  
+**⚠️ CRITICAL:** This is 1 of 6 final jobs. Must pass before running other 5!
 
 ---
 
