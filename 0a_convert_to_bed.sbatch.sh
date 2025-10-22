@@ -37,13 +37,18 @@ output_bfile="${genotype_dir}/ukb_genoHM3_bed"
 echo "Converting genotype files for BOLT-LMM v2.5..."
 echo "Input:  ${input_pfile}.pgen/pvar/psam"
 echo "Output: ${output_bfile}.bed/bim/fam"
+echo ""
 
-# Check if output already exists
-if [ -s "${output_bfile}.bed" ] && [ -s "${output_bfile}.bim" ] && [ -s "${output_bfile}.fam" ] ; then
-    echo "BED format files already exist: ${output_bfile}.bed/bim/fam"
-    echo "To regenerate, delete these files and run this script again."
-    exit 0
-fi
+# Remove existing output files to ensure clean conversion
+echo "Checking for existing output files..."
+for ext in bed bim fam log; do
+    if [ -f "${output_bfile}.${ext}" ]; then
+        echo "  Removing old file: ${output_bfile}.${ext}"
+        rm -f "${output_bfile}.${ext}"
+    fi
+done
+echo "✓ Ready for clean conversion"
+echo ""
 
 # Check if input files exist
 if [ ! -s "${input_pfile}.pgen" ] ; then

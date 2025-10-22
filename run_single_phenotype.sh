@@ -32,12 +32,16 @@ mkdir -p ${out_dir}
 
 out_file="${out_dir}/bolt_${phenotype}.${covar_str}"
 
-# Check if already completed
-if [ -s "${out_file}.stats.gz" ]; then
-    echo "Output already exists: ${out_file}.stats.gz"
-    echo "Skipping..."
-    exit 0
-fi
+# Remove existing output files to ensure clean run
+echo "Checking for existing output files..."
+for ext in stats stats.gz log log.gz; do
+    if [ -f "${out_file}.${ext}" ]; then
+        echo "  Removing old file: ${out_file}.${ext}"
+        rm -f "${out_file}.${ext}"
+    fi
+done
+echo "✓ Ready for clean run"
+echo ""
 
 # Input files
 genotype_bfile="${ukb21942_d}/geno/ukb_genoHM3/ukb_genoHM3_bed"

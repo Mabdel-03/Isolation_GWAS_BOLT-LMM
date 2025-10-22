@@ -41,13 +41,18 @@ output_prefix="${genotype_dir}/ukb_genoHM3_modelSNPs"
 echo "Preparing model SNPs for BOLT-LMM..."
 echo "Input: ${genotype_pfile}"
 echo "Output: ${output_snplist}"
+echo ""
 
-# Check if output already exists
-if [ -s "${output_snplist}" ] ; then
-    echo "Model SNPs file already exists: ${output_snplist}"
-    echo "To regenerate, delete the file and run this script again."
-    exit 0
-fi
+# Remove existing output files to ensure clean run
+echo "Checking for existing output files..."
+for file in "${output_snplist}" "${output_prefix}.prune.in" "${output_prefix}.prune.out" "${output_prefix}.log"; do
+    if [ -f "$file" ]; then
+        echo "  Removing old file: $file"
+        rm -f "$file"
+    fi
+done
+echo "✓ Ready for clean model SNP creation"
+echo ""
 
 # Create LD-pruned SNP list
 # Criteria for model SNPs (optimized for HM3 variant set):

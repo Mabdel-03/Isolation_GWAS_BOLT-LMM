@@ -33,6 +33,13 @@ echo "Testing with Loneliness phenotype, Day_NoPCs covariate set"
 echo "This tests the full pipeline on the complete genome (~1.3M variants)"
 echo ""
 
+# Clean up any previous test outputs
+echo "Removing any previous test outputs..."
+rm -f ${SRCDIR}/results/Day_NoPCs/EUR/bolt_Loneliness.Day_NoPCs.stats*
+rm -f ${SRCDIR}/results/Day_NoPCs/EUR/bolt_Loneliness.Day_NoPCs.log*
+echo "✓ Ready for clean test run"
+echo ""
+
 # Run test
 bash run_single_phenotype.sh Loneliness Day_NoPCs
 
