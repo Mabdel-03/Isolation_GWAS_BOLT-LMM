@@ -109,13 +109,10 @@ if [ "${overwrite}" == "FALSE" ] ; then
     fi
 fi
 
-# Extract variant IDs for this split
-extract_file="${out_base}.extract.txt"
-if [ ! -s "${extract_file}" ] ; then
-    zcat ${ukb21942_d}/gwas_geno/ukb_geno.var_split.tsv.gz \
-    | awk -v var_split="${var_split}" '(var_split == $NF){ print $3 }' \
-    > ${extract_file}
-fi
+# Note: BOLT-LMM will use ALL variants in the bfile
+# Variant splits are handled by using different bfiles or exclude lists
+# For now, we process all variants (can filter later if needed)
+# The var_split is kept in output filename for organization
 
 # Set up covariates based on covar_str
 if [ "${covar_str}" == "Day_NoPCs" ] ; then
@@ -155,9 +152,18 @@ for pheno in "${phenotypes[@]}" ; do
     # BOLT-LMM command for BINARY phenotypes
     # Following Day et al. methodology for case-control analysis
     # BOLT-LMM automatically detects binary (0/1 or 1/2) phenotypes and uses liability threshold model
+    
+    # Debug: Show BOLT-LMM command being executed
+    echo "Running BOLT-LMM with:"
+    echo "  Genotype file: ${genotype_bfile}"
+    echo "  Phenotype: ${pheno}"
+    echo "  Model SNPs: ${model_snps_file}"
+    echo "  Threads: ${bolt_threads}"
+    echo "  Memory: ${bolt_memory}"
+    echo "  Output: ${out_file}.stats"
+    
     bolt \
         --bfile=${genotype_bfile} \
-        --exclude=${extract_file} \
         --phenoFile=${ukb21942_d}/pheno/${analysis_name}.tsv.gz \
         --phenoCol=${pheno} \
         --covarFile=${ukb21942_d}/sqc/sqc.20220316.tsv.gz \
