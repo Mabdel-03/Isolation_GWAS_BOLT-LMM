@@ -6,8 +6,9 @@ set -beEo pipefail
 # Hardcode the top-level repo directory:
 REPODIR="/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942"
 
-# If you need SRCDIR, define it explicitly:
-SRCDIR="${REPODIR}/isolation_run_control_BOLT"
+# SRCDIR points to the Git repository directory (Isolation_GWAS_BOLT-LMM)
+# All outputs will be written to ${SRCDIR}/results/
+SRCDIR="/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942/Isolation_GWAS_BOLT-LMM"
 
 source "${REPODIR}/helpers/functions.sh"
 # If source_paths is needed, call it with the directory that actually holds the relevant files
