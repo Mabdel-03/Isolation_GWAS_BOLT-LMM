@@ -154,13 +154,41 @@ for pheno in "${phenotypes[@]}" ; do
     # BOLT-LMM automatically detects binary (0/1 or 1/2) phenotypes and uses liability threshold model
     
     # Debug: Show BOLT-LMM command being executed
-    echo "Running BOLT-LMM with:"
+    echo "========================================"
+    echo "Running BOLT-LMM for phenotype: ${pheno}"
+    echo "========================================"
     echo "  Genotype file: ${genotype_bfile}"
-    echo "  Phenotype: ${pheno}"
+    echo "  Phenotype file: ${ukb21942_d}/pheno/${analysis_name}.tsv.gz"
+    echo "  Phenotype column: ${pheno}"
+    echo "  Covariate file: ${ukb21942_d}/sqc/sqc.20220316.tsv.gz"
+    echo "  qCovar columns: ${qcovar_cols}"
+    echo "  Covar columns: ${covar_cols}"
+    echo "  Keep file: ${ukb21942_d}/sqc/population.20220316/${keep_set}.keep"
     echo "  Model SNPs: ${model_snps_file}"
+    echo "  LD scores: ${ld_scores_file}"
+    echo "  Genetic map: ${genetic_map_file}"
     echo "  Threads: ${bolt_threads}"
-    echo "  Memory: ${bolt_memory}"
+    echo "  Memory (MB): ${bolt_memory}"
     echo "  Output: ${out_file}.stats"
+    echo ""
+    
+    # Verify critical files exist before running BOLT
+    echo "Checking required files..."
+    for file in "${genotype_bfile}.bed" "${genotype_bfile}.bim" "${genotype_bfile}.fam" \
+                "${ukb21942_d}/pheno/${analysis_name}.tsv.gz" \
+                "${ukb21942_d}/sqc/sqc.20220316.tsv.gz" \
+                "${ukb21942_d}/sqc/population.20220316/${keep_set}.keep" \
+                "${model_snps_file}" \
+                "${ld_scores_file}" \
+                "${genetic_map_file}" ; do
+        if [ ! -f "$file" ]; then
+            echo "ERROR: Required file not found: $file" >&2
+            exit 1
+        else
+            echo "  ✓ Found: $(basename $file)"
+        fi
+    done
+    echo ""
     
     bolt \
         --bfile=${genotype_bfile} \
@@ -180,6 +208,15 @@ for pheno in "${phenotypes[@]}" ; do
         --statsFile=${out_file}.stats \
         --verboseStats \
         2>&1 | tee ${out_file}.log
+    
+    bolt_exit_code=$?
+    echo "BOLT-LMM exit code: ${bolt_exit_code}"
+    
+    if [ ${bolt_exit_code} -ne 0 ]; then
+        echo "ERROR: BOLT-LMM failed with exit code ${bolt_exit_code}" >&2
+        echo "Check log file: ${out_file}.log" >&2
+        exit 1
+    fi
     
     # Note: For binary traits, BOLT-LMM uses a liability threshold model
     # Effect sizes (BETA) are on the liability scale, not the observed scale
