@@ -41,13 +41,16 @@ EOF
 
 echo ""
 echo "========================================"
-echo "Test 1: Minimal BOLT (just bfile + pheno)"
+echo "Test 1: Minimal BOLT (bfile + pheno + LD scores)"
+echo "Note: LD scores required for --lmm"
 echo "========================================"
 
 bolt \
     --bfile=${genotype_bfile} \
     --phenoFile=${ukb21942_d}/pheno/isolation_run_control.tsv.gz \
     --phenoCol=Loneliness \
+    --LDscoresFile=${ld_scores_file} \
+    --geneticMapFile=${genetic_map_file} \
     --lmm \
     --numThreads=4 \
     --statsFile=/tmp/test1.stats
@@ -56,7 +59,8 @@ test1_result=$?
 echo "Test 1 exit code: $test1_result"
 
 if [ $test1_result -ne 0 ]; then
-    echo "FAILED at Test 1 - issue with basic files or BOLT installation"
+    echo "FAILED at Test 1 - issue with basic files, LD scores, or genetic map"
+    echo "Check that files exist and are readable"
     exit 1
 fi
 
