@@ -110,9 +110,9 @@ The pipeline consists of several stages executed on high-performance computing i
                             ↓
     ┌───────────────────────────────────────────┐
     │  Step 4: Full BOLT-LMM Analysis           │
-    │  Script: 1a_bolt_lmm.sbatch.sh           │
-    │  Jobs:   138 (69 splits × 2 cov sets)    │
-    │  Time:   6-12 hours per job              │
+    │  Script: 1_run_bolt_lmm.sbatch.sh        │
+    │  Jobs:   6 (3 phenotypes × 2 cov sets)   │
+    │  Time:   1-2 hours per job               │
     └───────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -251,7 +251,7 @@ This approach is consistent with BOLT-LMM best practices and similar to model SN
 
 **Purpose**: Validate the complete BOLT-LMM pipeline on a single variant split before committing computational resources to the full analysis.
 
-**Background**: Running BOLT-LMM on the complete genome for 138 jobs (~1,656 CPU-hours) requires significant computational resources. A test run on a single variant split (representing ~1/69th of the genome) validates that:
+**Background**: The simplified workflow runs BOLT-LMM on the complete genome for each phenotype-covariate combination (6 jobs total). A test run validates that:
 - All input files are correctly formatted
 - BOLT-LMM configuration is correct
 - Phenotype and covariate files are compatible
@@ -259,27 +259,28 @@ This approach is consistent with BOLT-LMM best practices and similar to model SN
 - No runtime errors occur
 
 **What It Tests**:
-- Runs BOLT-LMM on variant split 1 (~19,000 variants)
-- Processes all 3 phenotypes (Loneliness, FreqSoc, AbilityToConfide)
-- Uses Day_NoPCs covariate model
-- EUR population subset
+- Runs BOLT-LMM on **full genome** (~1.3M autosomal variants)
+- Tests one phenotype (Loneliness) with Day_NoPCs covariate model
+- EUR population filtering via EUR.remove file
+- Validates complete pipeline end-to-end
 
 **Process**:
 ```bash
 bash bolt_lmm.sh isolation_run_control BOLT 5,6,9 8 45000 Day_NoPCs EUR 1
 ```
 
-**Expected Outputs** (per phenotype):
-- `bolt_isolation_run_control.array_both_1.[Phenotype].BOLT.stats.gz`: Association statistics
-- `bolt_isolation_run_control.array_both_1.[Phenotype].BOLT.log.gz`: BOLT-LMM log
+**Expected Output**:
+- `results/Day_NoPCs/EUR/bolt_Loneliness.Day_NoPCs.stats.gz`: Association statistics
+- `results/Day_NoPCs/EUR/bolt_Loneliness.Day_NoPCs.log.gz`: BOLT-LMM log
 
 **Resources**: 45GB RAM, 8 CPUs, ~1-3 hours
 
 **Success Criteria**:
-- All 6 output files created (3 phenotypes × 2 file types)
-- Each statistics file contains ~19,000 variants
-- Log files show successful convergence
+- 2 output files created (1 stats.gz + 1 log.gz)
+- Statistics file contains ~1.3M variants
+- Log file shows successful convergence and heritability estimate
 - No error messages in SLURM error log
+- Look for "TEST PASSED" message
 
 **⚠️ Critical Checkpoint**: Do NOT proceed to full analysis if test fails!
 
@@ -294,13 +295,13 @@ bash bolt_lmm.sh isolation_run_control BOLT 5,6,9 8 45000 Day_NoPCs EUR 1
 
 **Purpose**: Perform genome-wide association testing for all three phenotypes across the complete genome using BOLT-LMM.
 
-**Analysis Strategy**: The genome is divided into 69 variant splits for computational efficiency and parallelization. Each split is processed independently, then results are combined.
+**Analysis Strategy (Simplified)**: Each job processes the **complete genome** (~1.3M autosomal variants) for one phenotype-covariate combination. No variant splitting is used - BOLT-LMM is designed to efficiently handle the full genome with mixed models.
 
-**Variant Splits**: Defined by `ukb_geno.var_split.tsv.gz`
-- 69 splits total
-- Splits are based on LD blocks and chromosome boundaries
-- Typical split: ~19,000 variants
-- Allows concurrent processing via SLURM array jobs
+**Job Allocation**: Array job with 6 tasks
+- 3 phenotypes (Loneliness, FreqSoc, AbilityToConfide)
+- 2 covariate sets (Day_NoPCs, Day_10PCs)
+- Each task: Full genome analysis with EUR filtering
+- All 6 tasks can run concurrently (if resources available)
 
 **Covariate Models**:
 
@@ -356,29 +357,30 @@ BOLT-LMM automatically detects binary phenotypes (0/1 or 1/2 coding) and applies
 - Approximate conversion to odds ratio: OR ≈ exp(β) for small effects
 
 **Job Structure**:
-- **Total jobs**: 138 (69 variant splits × 2 covariate models)
+- **Total jobs**: 6 (3 phenotypes × 2 covariate models)
 - **Per job**: 
-  - Processes 3 phenotypes
-  - Generates 6 output files (3 stats + 3 logs)
-- **Parallelization**: Up to 5 concurrent jobs (configurable)
-- **Walltime**: 12 hours per job (typically completes in 6-8 hours)
+  - Processes 1 phenotype on full genome
+  - Generates 2 output files (1 stats + 1 log)
+- **Parallelization**: All 6 jobs can run concurrently
+- **Walltime**: 47 hours limit per job (typically completes in 1-2 hours)
+- **Resources per job**: 150GB RAM, 100 CPUs
 
-**Output** (per phenotype per split):
-- `bolt_isolation_run_control.[split].[phenotype].BOLT.stats.gz`
+**Output** (per phenotype-covariate combination):
+- `results/[CovarSet]/EUR/bolt_[Phenotype].[CovarSet].stats.gz`
   - Contains: SNP ID, chromosome, position, alleles, frequencies, β, SE, p-values
   - Format: Tab-delimited, gzip compressed
-  - Size: ~500KB - 2MB per file
+  - Size: ~1-5GB per file (~1.3M variants)
   
-- `bolt_isolation_run_control.[split].[phenotype].BOLT.log.gz`
+- `results/[CovarSet]/EUR/bolt_[Phenotype].[CovarSet].log.gz`
   - Contains: BOLT-LMM version, parameters, sample sizes, convergence info, heritability estimates
   - Format: Text log, gzip compressed
 
-**Resources** (per job): 45GB RAM, 8 CPUs, 12 hours, kellis partition
+**Resources** (per job): 150GB RAM, 100 CPUs, 47 hours limit, kellis partition
 
 **Total Computational Cost**: 
-- 138 jobs × 12 hours = 1,656 job-hours (if run sequentially)
-- With 5 concurrent jobs: ~33 hours wall-clock time
-- Total CPU-hours: 1,656 jobs × 8 CPUs = 13,248 CPU-hours
+- 6 jobs × 2 hours = 12 job-hours (typical, if run sequentially)
+- With concurrent execution: ~2 hours wall-clock time
+- Total CPU-hours: 6 jobs × 100 CPUs × 2 hours = 1,200 CPU-hours
 
 **Hardware Partition**: All jobs submitted to the **kellis partition** on the MIT Luria HPC cluster, optimized for genomics workloads with high-memory nodes.
 
@@ -422,7 +424,7 @@ bash 99_check_progress.sh
 - `combine_bolt_logs.sh` (log combination)
 - `combine_bolt_sumstats.sh` (statistics combination)
 
-**Purpose**: Merge BOLT-LMM results from all 69 variant splits into final genome-wide summary statistics files.
+**Purpose**: BOLT-LMM outputs are already final genome-wide summary statistics. No combining step needed with the simplified workflow!
 
 **Process**:
 
@@ -633,9 +635,9 @@ plt.title(f'QQ Plot: Loneliness (λ_GC={lambda_gc:.3f})')
 
 **Total Resource Requirements**:
 - **Disk space**: ~200GB for genotypes + outputs
-- **Peak memory**: 45GB per concurrent job
-- **Total CPU-hours**: ~13,250 (138 jobs × 8 CPUs × ~12 hours)
-- **Wall-clock time**: ~3-4 days for complete pipeline
+- **Peak memory**: 150GB per concurrent job
+- **Total CPU-hours**: ~1,200 (6 jobs × 100 CPUs × ~2 hours)
+- **Wall-clock time**: ~1 day for complete pipeline (preprocessing + analysis)
 
 ### Software Requirements
 

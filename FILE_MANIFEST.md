@@ -15,14 +15,19 @@ This directory contains a complete BOLT-LMM v2.5 GWAS analysis pipeline for bina
 - Processes one variant split at a time
 - Outputs .stats.gz and .log.gz files
 
-### `1a_bolt_lmm.sbatch.sh`
-**Purpose**: Job submission script for SLURM cluster  
-**Usage**: `bash 1a_bolt_lmm.sbatch.sh`  
+### `1_run_bolt_lmm.sbatch.sh` ⭐ SIMPLIFIED WORKFLOW (RECOMMENDED)
+**Purpose**: Simplified array job submission for SLURM cluster  
+**Usage**: `sbatch 1_run_bolt_lmm.sbatch.sh`  
 **What it does**:
-- Generates list of 138 jobs (69 variant splits × 2 covariate sets)
-- Submits SLURM array jobs with appropriate resources
-- Creates job list file with timestamp
-- Runs max 5 concurrent jobs
+- Submits array job with 6 tasks (3 phenotypes × 2 covariate sets)
+- Each task processes full genome for one phenotype-covariate combo
+- All tasks can run concurrently
+- No combining step needed
+
+### `1a_bolt_lmm.sbatch.sh` (DEPRECATED - Old 138-job workflow)
+**Purpose**: Legacy job submission with variant splitting  
+**Status**: Deprecated - use `1_run_bolt_lmm.sbatch.sh` instead  
+**Note**: This was the old approach with 69 variant splits
 
 ### `1b_combine_bolt_output.sh`
 **Purpose**: Orchestrates combining results from all variant splits  
@@ -237,8 +242,10 @@ These are kept for reference but SLURM batch versions should be used:
 ### Populations
 - **EUR**: European ancestry (filtered via sqc/population.20220316/EUR.keep)
 
-### Variant Splits
-- **69 splits**: Variants divided for parallelization (defined in gwas_geno/ukb_geno.var_split.info.tsv.gz)
+### Analysis Strategy
+- **No variant splitting**: Each job processes full genome (~1.3M variants)
+- **6 jobs total**: 3 phenotypes × 2 covariate sets
+- **Simplified approach**: More efficient than 69-split strategy
 
 ## Resource Requirements (Updated for Kellis Partition)
 
@@ -256,12 +263,12 @@ These are kept for reference but SLURM batch versions should be used:
 - Peak memory during pairwise r² computation
 - 32GB insufficient (job killed at 32.7GB usage)
 
-### Total Analysis
-- **Total jobs**: 138 (69 variant splits × 2 covariate sets)
-- **Concurrent**: Max 5 jobs at once (configurable in `1a_bolt_lmm.sbatch.sh`)
-- **Wall time**: 3-4 days from start to finish
-- **Disk space**: ~200GB (150GB genotypes + 50GB outputs)
-- **Total CPU-hours**: ~13,250 (138 jobs × 8 CPUs × ~12 hours)
+### Total Analysis (Simplified Workflow)
+- **Total jobs**: 6 (3 phenotypes × 2 covariate sets)
+- **Concurrent**: All 6 can run simultaneously
+- **Wall time**: ~1 day from start to finish
+- **Disk space**: ~200GB (145GB genotypes + 55GB outputs)
+- **Total CPU-hours**: ~1,200 (6 jobs × 100 CPUs × ~2 hours)
 
 ## Complete File Listing
 
