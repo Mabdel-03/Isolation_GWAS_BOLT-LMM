@@ -67,23 +67,25 @@ echo "  Output: ${out_file}.stats"
 echo ""
 
 # Verify all required files exist
+remove_file="${ukb21942_d}/sqc/population.20220316/${keep_set}.remove"
+
 echo "Verifying input files..."
 for file in "${genotype_bfile}.bed" "${genotype_bfile}.bim" "${genotype_bfile}.fam" \
             "${ukb21942_d}/pheno/isolation_run_control.tsv.gz" \
             "${ukb21942_d}/sqc/sqc.20220316.tsv.gz" \
+            "${remove_file}" \
             "${model_snps_file}" \
             "${ld_scores_file}" \
             "${genetic_map_file}"; do
     if [ ! -f "$file" ]; then
         echo "ERROR: Required file not found: $file" >&2
+        if [[ "$file" == *".remove" ]]; then
+            echo "Create it by running: bash create_remove_file.sh" >&2
+        fi
         exit 1
     fi
 done
 echo "✓ All input files verified"
-echo ""
-echo "Note: Not using --keep or --remove filter"
-echo "BOLT-LMM will analyze all samples in phenotype file"
-echo "Ensure phenotype/covariate files are pre-filtered to EUR if needed"
 echo ""
 
 # Run BOLT-LMM
@@ -92,10 +94,19 @@ echo "This will analyze ~1.3M autosomal variants (full genome)"
 echo ""
 
     # BOLT-LMM command
-    # Note: Not using --keep or --remove - phenotype/covariate files should already be EUR-filtered
-    # BOLT-LMM will analyze all samples present in phenotype file
+    # Using --remove to filter to EUR ancestry samples
+    # BOLT-LMM uses --remove (samples to exclude), not --keep (PLINK2-specific)
+    remove_file="${ukb21942_d}/sqc/population.20220316/${keep_set}.remove"
+    
+    if [ ! -f "${remove_file}" ]; then
+        echo "ERROR: Remove file not found: ${remove_file}" >&2
+        echo "Run: bash create_remove_file.sh to create it from EUR.keep" >&2
+        exit 1
+    fi
+    
     bolt \
         --bfile=${genotype_bfile} \
+        --remove=${remove_file} \
         --phenoFile=${ukb21942_d}/pheno/isolation_run_control.tsv.gz \
         --phenoCol=${phenotype} \
         --covarFile=${ukb21942_d}/sqc/sqc.20220316.tsv.gz \
