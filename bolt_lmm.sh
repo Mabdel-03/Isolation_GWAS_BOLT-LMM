@@ -33,7 +33,7 @@ bolt_memory=$5        # 30000 (BOLT needs more memory than PLINK)
 covar_str=$6          # Day_10PCs or Day_NoPCs
 keep_set=$7           # EUR
 idx=$8                # 1-69
-use_tmp_geno="TRUE"
+use_tmp_geno="FALSE"  # Changed to FALSE - bed files are in main directory, not tmp
 overwrite="FALSE"
 
 # Phenotype columns for isolation_run_control
@@ -64,18 +64,11 @@ if [ ! -d $(dirname "${out_base}") ] ; then mkdir -p $(dirname "${out_base}") ; 
 ####################################################################
 
 # BOLT-LMM requires bed/bim/fam format
-# Assuming genotype files are available in bed format or need conversion
-if [ "${use_tmp_geno}" == "TRUE" ] ; then
-    # copy genotype files into cache directory if using tmp
-    bash ${REPODIR}/helpers/cache.pgen.sh ukb_genoHM3
-    
-    # For BOLT-LMM, we need bed/bim/fam format (converted from pgen)
-    # Use the _bed suffix for converted files
-    genotype_bfile=${tmp_ukb21942_d}/geno/ukb_genoHM3/ukb_genoHM3_bed
-else
-    # Use bed format files (converted from pgen via 0_convert_to_bed.sh)
-    genotype_bfile=${ukb21942_d}/geno/ukb_genoHM3/ukb_genoHM3_bed
-fi
+# Using bed files from main data directory (converted via 0a_convert_to_bed.sbatch.sh)
+# Not using tmp directory since bed files are large (~150GB) and already optimized
+genotype_bfile=${ukb21942_d}/geno/ukb_genoHM3/ukb_genoHM3_bed
+
+echo "Using genotype files: ${genotype_bfile}.bed/bim/fam"
 
 # Model SNPs file (for computing genetic relationship matrix)
 # This should be a subset of well-imputed common variants (usually ~500K SNPs)
