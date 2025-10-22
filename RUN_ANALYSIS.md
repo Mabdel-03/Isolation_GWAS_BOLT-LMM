@@ -108,11 +108,11 @@ watch -n 30 squeue -u $USER
 **Script:** `1b_combine_bolt_output.sh` (not a batch script, runs quickly)
 
 ```bash
-# After ALL 138 jobs complete
-bash 99_check_progress.sh  # Verify all complete
+# After all 6 jobs complete
+ls -lh results/Day_NoPCs/EUR/bolt_*.stats.gz
+ls -lh results/Day_10PCs/EUR/bolt_*.stats.gz
 
-# Combine results
-bash 1b_combine_bolt_output.sh
+# Results are ready! No combining step needed
 ```
 
 **Expected time:** 1-2 hours
@@ -203,9 +203,10 @@ grep "TEST PASSED" bolt_test.*.out
 
 ### Step 4 (Full):
 ```bash
-# All jobs complete:
-bash 99_check_progress.sh
-# Should show 69/69 for each phenotype
+# All 6 jobs complete:
+squeue -u $USER  # Should show no jobs running
+ls -lh results/Day_NoPCs/EUR/  # Should show 3 .stats.gz files
+ls -lh results/Day_10PCs/EUR/  # Should show 3 .stats.gz files
 ```
 
 ---
@@ -246,11 +247,11 @@ sprio -u $USER
 
 | Day | Activity |
 |-----|----------|
-| Day 1 AM | Submit Steps 1-2, monitor |
-| Day 1 PM | Submit Step 3 (test), monitor |
-| Day 1 Evening | If test passes, submit Step 4 (full analysis) |
-| Day 2-3 | Jobs running (138 jobs) |
-| Day 3-4 | Combine results, QC |
+| Day 1 Morning | Submit preprocessing (Steps 1-3), ~1 hour total |
+| Day 1 Afternoon | Submit test (Step 4), ~1-2 hours |
+| Day 1 Evening | If test passes, submit full analysis (Step 5) - 6 jobs |
+| Day 1 Night / Day 2 Morning | All 6 jobs complete (~1-2 hours) |
+| Day 2 | Results ready for QC and downstream analysis |
 
 **Total:** 3-4 days from start to finish
 
