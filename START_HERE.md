@@ -1,5 +1,19 @@
 # 🚀 START HERE: BOLT-LMM Binary Trait GWAS
 
+## ⚡ SIMPLIFIED WORKFLOW (RECOMMENDED)
+
+**We now use a streamlined 6-job approach** - much faster and simpler!
+
+- **6 jobs total** (not 138!) - one per phenotype-covariate combination
+- Each job processes the **full genome** (~1.3M autosomal variants)
+- **150GB RAM, 100 CPUs** per job
+- **~1 day** from test to results (not 3-4 days!)
+- No variant splitting, no combining step needed
+
+👉 **See [SIMPLIFIED_WORKFLOW.md](SIMPLIFIED_WORKFLOW.md) for the recommended workflow!**
+
+---
+
 ## What You Have
 
 A complete, ready-to-run BOLT-LMM GWAS pipeline for **binary phenotypes** based on:
@@ -7,6 +21,8 @@ A complete, ready-to-run BOLT-LMM GWAS pipeline for **binary phenotypes** based 
 > **Day, F.R., et al. (2018)**  
 > "Elucidating the genetic basis of social interaction and isolation"  
 > Nature Communications
+
+**Optimized for**: MIT Luria HPC (kellis partition), UK Biobank scale (~500K samples)
 
 ## ⚠️ Critical Information: BINARY PHENOTYPES
 
