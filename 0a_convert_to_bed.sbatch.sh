@@ -53,10 +53,14 @@ if [ ! -s "${input_pfile}.pgen" ] ; then
 fi
 
 # Convert pgen to bed
+# IMPORTANT: Only include autosomes (chr 1-22) to avoid BOLT-LMM chromosome code errors
+# BOLT-LMM doesn't recognize MT, X, Y, XY chromosome codes
 echo "Running conversion (this may take a while for large datasets)..."
+echo "Converting AUTOSOMES ONLY (chr 1-22) for BOLT-LMM compatibility"
 
 plink2 \
     --pfile ${input_pfile} vzs \
+    --chr 1-22 \
     --make-bed \
     --out ${output_bfile} \
     --threads ${SLURM_CPUS_PER_TASK} \
