@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=model_snps
 #SBATCH --partition=kellis
-#SBATCH --mem=80000
-#SBATCH --cpus-per-task=8
+#SBATCH --mem=80G
+#SBATCH -n 8
 #SBATCH --time=2:00:00
 #SBATCH --output=%x.%j.out
 #SBATCH --error=%x.%j.err

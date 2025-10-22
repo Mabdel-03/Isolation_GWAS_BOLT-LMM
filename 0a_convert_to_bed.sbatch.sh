@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=convert_to_bed
 #SBATCH --partition=kellis
-#SBATCH --mem=32000
-#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH -n 8
 #SBATCH --time=2:00:00
 #SBATCH --output=%x.%j.out
 #SBATCH --error=%x.%j.err

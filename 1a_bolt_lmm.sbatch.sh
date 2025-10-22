@@ -23,8 +23,8 @@ batch_size=1 # the number of jobs executed in an array task in SLURM.
 # BOLT-LMM requires more resources than PLINK
 # Increased memory and threads for BOLT-LMM
 # Using kellis partition as requested
-# Resources increased for large-scale analysis: 150GB RAM, 100 CPUs, 47 hours
-sbatch_resources_str='-p kellis --mem=150000 --cpus-per-task=100 --nodes=1 --time=47:00:00'
+# Resources increased for large-scale analysis: 100GB RAM, 100 tasks, 47 hours
+sbatch_resources_str='-p kellis --mem=100G -n 100 --nodes=1 --time=47:00:00'
 # http://rous.mit.edu/index.php/Luria#User_job_limitations
 
 # log directory
@@ -61,7 +61,7 @@ conda activate /home/mabdel03/data/conda_envs/GWAS_env
 # generate a list of jobs
 #############################
 
-job_cmd="bash ${SRCDIR}/bolt_lmm.sh ${analysis_name} BOLT ${pheno_col_nums} 100 150000"
+job_cmd="bash ${SRCDIR}/bolt_lmm.sh ${analysis_name} BOLT ${pheno_col_nums} 100 100000"
 
 # analysis_name=$1
 # out_suffix=$2     # BOLT

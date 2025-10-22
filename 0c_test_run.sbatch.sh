@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=bolt_test
 #SBATCH --partition=kellis
-#SBATCH --mem=150000
-#SBATCH --cpus-per-task=100
+#SBATCH --mem=100G
+#SBATCH -n 100
 #SBATCH --time=47:00:00
 #SBATCH --output=%x.%j.out
 #SBATCH --error=%x.%j.err
@@ -33,8 +33,8 @@ echo "Running test with variant split 1, Day_NoPCs, EUR population..."
 echo "This will process all 3 phenotypes: Loneliness, FreqSoc, AbilityToConfide"
 echo ""
 
-# Run the test
-bash bolt_lmm.sh isolation_run_control BOLT 5,6,9 100 150000 Day_NoPCs EUR 1
+# Run the test (100 threads, 100GB memory in MB)
+bash bolt_lmm.sh isolation_run_control BOLT 5,6,9 100 100000 Day_NoPCs EUR 1
 
 # Check if test succeeded
 SRCDIR="/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942/Isolation_GWAS_BOLT-LMM"
