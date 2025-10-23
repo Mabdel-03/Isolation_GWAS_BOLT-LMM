@@ -2,12 +2,14 @@
 
 ## 🎯 Quick Reference Card
 
+**BOLT-LMM version**: v2.5 (June 2025 release)  
 **Total Jobs**: 6 (not 138!)  
-**Resources per job**: 150GB RAM, 100 CPUs, 47h limit  
-**Actual runtime**: 1-2 hours per job  
+**Resources per job**: 150GB RAM, 100 CPUs (multithreading enabled), 47h limit  
+**Actual runtime**: 2-3 hours per job  
+**Sample size**: ~426K EUR samples (includes related individuals via EUR_MM.keep)  
 **Output location**: `Isolation_GWAS_BOLT-LMM/results/`  
-**Ancestry filter**: EUR only (via EUR.remove file)  
-**Chromosomes**: Autosomes 1-22 only (BOLT-LMM limitation)
+**Ancestry**: European (WB_MM + NBW_MM, including relatives - appropriate for mixed models)  
+**Chromosomes**: Autosomes 1-22 only (BOLT v2.5 limitation)
 
 ---
 
@@ -28,13 +30,14 @@ conda activate /home/mabdel03/data/conda_envs/bolt_lmm
   # Creates: ukb_genoHM3_bed.bed/bim/fam (~145GB, chr 1-22 only)
   ```
 
-- [ ] **Step 2**: Filter phenotype/covariate files to EUR
+- [ ] **Step 2**: Filter phenotype/covariate files to EUR (including relatives)
   ```bash
   python3 filter_to_EUR_python.py
   # Takes 2-3 minutes
-  # Creates: isolation_run_control.EUR.tsv.gz (~353K EUR samples)
-  # Creates: sqc.EUR.tsv.gz (~353K EUR samples)
-  # Simpler than using --remove (avoids ID matching issues)
+  # Uses: EUR_MM.keep (426,602 EUR samples including related)
+  # Creates: isolation_run_control.EUR.tsv.gz (~420K EUR samples)
+  # Creates: sqc.EUR.tsv.gz (~426K EUR samples)
+  # Includes related individuals (BOLT-LMM handles via GRM)
   ```
 
 - [ ] **Step 3**: Create model SNPs (after Step 1 completes)
@@ -97,7 +100,9 @@ Each file contains **~1.3M variants** with BOLT-LMM association statistics.
 1. **Autosomes Only**: Converted genotypes include chr 1-22 only (BOLT-LMM doesn't recognize MT/X/Y)
 
 2. **EUR Filtering**: Via pre-filtered phenotype/covariate files (simpler than --remove)
-   - Uses `filter_to_EUR_python.py` to create EUR-only data files
+   - **Uses EUR_MM.keep**: 426,602 EUR samples (WB_MM + NBW_MM, **includes related**)
+   - BOLT-LMM v2.5 handles relatedness via GRM (appropriate for mixed models)
+   - Python script: `filter_to_EUR_python.py`
    - Avoids ID matching issues between .fam and .keep files
 
 3. **No Variant Splitting**: Each job processes full genome (~1.3M variants)
@@ -206,7 +211,8 @@ Before starting, verify:
   - [ ] `geno/ukb_genoHM3/ukb_genoHM3.pgen` (will be converted)
   - [ ] `pheno/isolation_run_control.tsv.gz` (all samples)
   - [ ] `sqc/sqc.20220316.tsv.gz` (all samples)
-  - [ ] `sqc/population.20220316/EUR.keep` (EUR samples to analyze)
+  - [ ] `sqc/population.20220316/EUR_MM.keep` (426K EUR samples, includes relatives)
+  - [ ] `sqc/population.20220316/WB_MM.keep` and `NBW_MM.keep` (used to create EUR_MM)
 
 ---
 

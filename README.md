@@ -46,7 +46,7 @@ This analysis examines three binary phenotypes related to social isolation and s
 
 ### Why BOLT-LMM?
 
-We use BOLT-LMM v2.5[^5][^6] for association testing rather than standard logistic regression for several key advantages:
+We use **BOLT-LMM v2.5** (June 2025 release)[^5][^6] for association testing rather than standard logistic regression for several key advantages:
 
 1. **Linear Mixed Model Framework**: Accounts for population structure and cryptic relatedness through a genetic relationship matrix (GRM), providing better control than fixed-effect principal components alone
 
@@ -497,7 +497,10 @@ zcat Day_NoPCs/EUR/Loneliness.bolt.stats.gz | \
 
 Based on the Day et al. (2018) study and UK Biobank sample sizes:
 
-- **Sample size**: ~450,000 European ancestry individuals
+- **Sample size**: ~426,600 European ancestry individuals (EUR_MM: includes related individuals)
+  - WB_MM (White British): 409,853
+  - NBW_MM (Non-British White): 16,749
+  - **Includes related individuals** - appropriate for BOLT-LMM mixed models
 - **Effective sample size** (binary traits): Variable by phenotype prevalence
   - Loneliness (K≈0.10): Neff ≈ 72,000
   - AbilityToConfide (K≈0.90): Neff ≈ 72,000
@@ -642,9 +645,12 @@ plt.title(f'QQ Plot: Loneliness (λ_GC={lambda_gc:.3f})')
 ### Software Requirements
 
 **Core Software**:
-- **BOLT-LMM v2.5**: Association testing (June 2025 release)
+- **BOLT-LMM v2.5**: Association testing (June 2025 release, latest version)
+  - Installed at: `/home/mabdel03/data/software/BOLT-LMM_v2.5/`
+  - **Multithreading**: 100 threads per job (optimized performance)
+  - Tables: `LDSCORE.1000G_EUR.GRCh38.tab.gz`, `genetic_map_hg19_withX.txt.gz`
 - **PLINK2 v2.0**: Genotype conversion and QC
-- **Python 3.10**: Post-processing and visualization
+- **Python 3.10**: Data filtering and post-processing
 - **R 4.2** (optional): Advanced visualization and downstream analyses
 
 **Python Packages**:
@@ -662,10 +668,12 @@ plt.title(f'QQ Plot: Loneliness (λ_GC={lambda_gc:.3f})')
 
 | Aspect | Day et al. (2018) | This Analysis |
 |--------|-------------------|---------------|
-| **Software** | BOLT-LMM v2.3 | BOLT-LMM v2.5 |
+| **Software** | BOLT-LMM v2.3 | **BOLT-LMM v2.5** |
 | **Phenotypes** | Binary social isolation traits | Same definitions |
-| **Population** | UK Biobank European ancestry | Same (EUR) |
-| **Sample size** | ~456,000 | ~450,000-488,000 |
+| **Population** | UK Biobank European ancestry | EUR_MM (WB_MM + NBW_MM) |
+| **Sample size** | ~456,000 | **~426,600** (includes related) |
+| **Related individuals** | Likely included | **Included via EUR_MM.keep** |
+| **Relatedness handling** | GRM | GRM (444K model SNPs) |
 | **Covariates** | Age, sex, array, assessment center, PCs | Age, sex, array, PCs |
 | **Variant set** | HM3 + imputed | HM3 only (this analysis) |
 | **Model** | Linear mixed model, liability threshold | Same |
@@ -683,8 +691,10 @@ plt.title(f'QQ Plot: Loneliness (λ_GC={lambda_gc:.3f})')
    - Allows comparison of PC adjustment effects
 
 3. **BOLT-LMM Version**:
-   - Updated to v2.5 (improved calibration and efficiency)
+   - Updated to **v2.5** (June 2025 release - latest version)
+   - Improved calibration and computational efficiency
    - Better handling of binary traits
+   - **Multithreading**: Using 100 threads (12.5× typical usage)
 
 ### Expected Reproducibility
 

@@ -8,12 +8,14 @@
 ## ✅ What's Working
 
 ### Completed Setup:
-1. ✅ BOLT-LMM v2.5 installed at `/home/mabdel03/data/software/BOLT-LMM_v2.5/`
+1. ✅ **BOLT-LMM v2.5** (June 2025 release) installed at `/home/mabdel03/data/software/BOLT-LMM_v2.5/`
 2. ✅ Conda environment created: `/home/mabdel03/data/conda_envs/bolt_lmm`
-3. ✅ Genotypes converted to bed format (chr 1-22, autosomes only)
-4. ✅ Model SNPs created: 444,241 SNPs (r²<0.5, MAF≥0.5%)
-5. ✅ Simplified 6-job workflow implemented
-6. ✅ EUR filtering approach finalized (Python-based)
+3. ✅ Genotypes converted to bed format (chr 1-22, autosomes only, ~1.3M variants)
+4. ✅ Model SNPs created: 444,241 SNPs (r²<0.5, MAF≥0.5%, 80GB RAM)
+5. ✅ Simplified 6-job workflow implemented (no variant splitting)
+6. ✅ EUR_MM.keep created: **426,602 EUR samples (includes related individuals)**
+7. ✅ EUR filtering via Python (robust, handles relatedness)
+8. ✅ **Multithreading enabled: 100 threads per job** (12.5× typical BOLT usage)
 
 ### Current Workflow:
 - **6 jobs total** (3 phenotypes × 2 covariate sets)
@@ -34,8 +36,14 @@ python3 filter_to_EUR_python.py
 ```
 
 **This creates**:
-- `isolation_run_control.EUR.tsv.gz` (EUR-filtered phenotypes)
-- `sqc.EUR.tsv.gz` (EUR-filtered covariates)
+- `isolation_run_control.EUR.tsv.gz` (~420K EUR_MM samples, includes related)
+- `sqc.EUR.tsv.gz` (~426K EUR_MM samples, includes related)
+
+**Using EUR_MM.keep (not EUR.keep)**:
+- EUR_MM: 426,602 samples (includes related individuals)
+- EUR: 353,122 samples (unrelated only)
+- **Gain: +73,480 samples** for better statistical power!
+- Appropriate for BOLT-LMM mixed models
 
 ---
 
@@ -65,7 +73,7 @@ ls -lh *.EUR.tsv.gz
 
 # 7. Check sample counts
 zcat isolation_run_control.EUR.tsv.gz | wc -l
-# Should show ~353,123 (353,122 samples + 1 header)
+# Should show ~426,603 (426,602 EUR_MM samples + 1 header)
 
 # 8. Submit test run
 sbatch 0c_test_simplified.sbatch.sh
