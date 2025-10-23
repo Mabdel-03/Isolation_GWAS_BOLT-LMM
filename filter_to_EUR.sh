@@ -44,42 +44,50 @@ echo ""
 
 # Filter phenotype file
 echo "Filtering phenotype file..."
+echo "This may take a minute..."
 
-# Create temporary ID file (just IDs, no header)
-awk '{print $2}' "${keep_file}" | sort > /tmp/eur_iids.txt
+# Create temporary ID lookup file (just IIDs from keep file)
+awk '{print $2}' "${keep_file}" > /tmp/eur_iids.txt
+n_ids=$(wc -l < /tmp/eur_iids.txt)
+echo "  EUR IDs to match: ${n_ids}"
 
-# Filter phenotype file:
-# 1. Extract header
-# 2. Filter data rows to EUR IDs only
-# 3. Compress output
-
+# Method: Use grep with file of patterns (much faster and more reliable)
 {
-    # Header
+    # Extract and write header
     zcat "${pheno_file}" | head -1
     
-    # Data rows - keep only EUR IDs
-    # Join on IID (column 2)
-    zcat "${pheno_file}" | tail -n +2 | awk 'NR==FNR{ids[$1]; next} $2 in ids' /tmp/eur_iids.txt -
+    # Extract data rows and filter using grep
+    # -F: fixed strings (not regex)
+    # -f: patterns from file
+    # -w: whole word match (IID must be complete match)
+    zcat "${pheno_file}" | tail -n +2 | grep -F -f /tmp/eur_iids.txt
     
 } | gzip > "${pheno_eur}"
 
 n_pheno_out=$(zcat "${pheno_eur}" | tail -n +2 | wc -l)
-echo "✓ EUR phenotype file created: ${n_pheno_out} samples"
+echo "✓ EUR phenotype file created"
+echo "  Input samples: $(zcat "${pheno_file}" | tail -n +2 | wc -l)"
+echo "  Output samples: ${n_pheno_out}"
+echo ""
 
 # Filter covariate file
 echo "Filtering covariate file..."
+echo "This may take a minute..."
 
 {
     # Header
     zcat "${covar_file}" | head -1
     
-    # Data rows - keep only EUR IDs
-    zcat "${covar_file}" | tail -n +2 | awk 'NR==FNR{ids[$1]; next} $2 in ids' /tmp/eur_iids.txt -
+    # Data rows filtered to EUR
+    zcat "${covar_file}" | tail -n +2 | grep -F -f /tmp/eur_iids.txt
     
 } | gzip > "${covar_eur}"
 
 n_covar_out=$(zcat "${covar_eur}" | tail -n +2 | wc -l)
-echo "✓ EUR covariate file created: ${n_covar_out} samples"
+echo "✓ EUR covariate file created"
+echo "  Input samples: $(zcat "${covar_file}" | tail -n +2 | wc -l)"
+echo "  Output samples: ${n_covar_out}"
+echo ""
 
 # Clean up
 rm -f /tmp/eur_iids.txt
