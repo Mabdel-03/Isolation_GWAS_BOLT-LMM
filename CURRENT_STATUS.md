@@ -47,7 +47,7 @@ python3 filter_to_EUR_python.py
 
 ---
 
-## 🎯 Immediate Next Steps on HPC
+## 🎯 Immediate Next Steps on HPC (SKIP TEST - RUN ALL 6 JOBS)
 
 ```bash
 # 1. Navigate to repository
@@ -59,32 +59,31 @@ git pull origin main
 # 3. Activate conda
 conda activate /home/mabdel03/data/conda_envs/bolt_lmm
 
-# 4. Delete incomplete EUR files (if any)
-rm -f isolation_run_control.EUR.tsv.gz sqc.EUR.tsv.gz
+# 4. If EUR files don't exist or are incomplete, create them:
+bash create_EUR_MM_keep.sh  # Creates EUR_MM.keep (426K samples)
+python3 filter_to_EUR_python.py  # Filter pheno/covar (~3 min)
 
-# 5. Run Python EUR filter
-python3 filter_to_EUR_python.py
-# Wait for completion (~2-3 minutes)
-# Should see progress indicators
-
-# 6. Verify EUR files created successfully
+# 5. Verify EUR files (should already be done)
 ls -lh *.EUR.tsv.gz
-# Should see two files, each 50-200MB (NOT 99 bytes!)
+# isolation_run_control.EUR.tsv.gz: ~2-5MB
+# sqc.EUR.tsv.gz: ~139MB
 
-# 7. Check sample counts
-zcat isolation_run_control.EUR.tsv.gz | wc -l
-# Should show ~426,603 (426,602 EUR_MM samples + 1 header)
-
-# 8. Submit test run
-sbatch 0c_test_simplified.sbatch.sh
-
-# 9. Monitor
-tail -f bolt_test_simple.*.out
-# Should see: "Total indivs after QC: 350000+" (NOT 0!)
-
-# 10. If test passes, submit full analysis
+# 6. Submit ALL 6 JOBS directly (skip test!)
 sbatch 1_run_bolt_lmm.sbatch.sh
+
+# 7. Monitor (all 6 run concurrently)
+squeue -u $USER
+watch -n 60 'ls -lh results/*/EUR/*.stats.gz 2>/dev/null | wc -l'
+# Count increases: 0 → 1 → 2 → ... → 6
+
+# 8. Wait 8-12 hours for all jobs to complete
+
+# 9. Check results (6 files total)
+ls -lh results/Day_NoPCs/EUR/bolt_*.stats.gz  # 3 files
+ls -lh results/Day_10PCs/EUR/bolt_*.stats.gz  # 3 files
 ```
+
+**Why skip test?**: Takes 8-12 hours (same as final jobs), and we've debugged thoroughly!
 
 ---
 
