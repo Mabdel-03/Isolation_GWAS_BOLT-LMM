@@ -28,28 +28,33 @@ conda activate /home/mabdel03/data/conda_envs/bolt_lmm
   # Creates: ukb_genoHM3_bed.bed/bim/fam (~145GB, chr 1-22 only)
   ```
 
-- [ ] **Step 2**: Create EUR.remove file
+- [ ] **Step 2**: Filter phenotype/covariate files to EUR
   ```bash
-  bash create_remove_file.sh
-  # Takes <1 second
-  # Converts: EUR.keep → EUR.remove (BOLT uses --remove)
+  python3 filter_to_EUR_python.py
+  # Takes 2-3 minutes
+  # Creates: isolation_run_control.EUR.tsv.gz (~353K EUR samples)
+  # Creates: sqc.EUR.tsv.gz (~353K EUR samples)
+  # Simpler than using --remove (avoids ID matching issues)
   ```
 
-- [ ] **Step 3**: Create model SNPs
+- [ ] **Step 3**: Create model SNPs (after Step 1 completes)
   ```bash
   sbatch 0b_prepare_model_snps.sbatch.sh
   # Wait ~15-30 min
   # Creates: ~444K SNPs (r²<0.5, MAF≥0.5%, 80GB RAM)
+  # Autosomes only (chr 1-22)
   ```
 
 ### ✅ Validation
 
-- [ ] **Step 4**: Test run (1 of 6 jobs)
+- [ ] **Step 4**: Test run (1 of 6 jobs) - after Steps 1-3 complete
   ```bash
   sbatch 0c_test_simplified.sbatch.sh
   # Wait ~1-2 hours
-  # Tests: Loneliness + Day_NoPCs + EUR
+  # Tests: Loneliness + Day_NoPCs on full genome with EUR samples
+  # Uses EUR-filtered files (no --remove needed)
   # Check: grep "TEST PASSED" bolt_test_simple.*.out
+  # ⚠️ Must pass before Step 5!
   ```
 
 ### ✅ Full Analysis
@@ -89,17 +94,19 @@ Each file contains **~1.3M variants** with BOLT-LMM association statistics.
 
 ## 🔑 Key Points
 
-1. **Autosomes Only**: Converted genotypes include chr 1-22 only (BOLT-LMM limitation)
+1. **Autosomes Only**: Converted genotypes include chr 1-22 only (BOLT-LMM doesn't recognize MT/X/Y)
 
-2. **EUR Filtering**: Via EUR.remove file (BOLT uses `--remove`, not `--keep`)
+2. **EUR Filtering**: Via pre-filtered phenotype/covariate files (simpler than --remove)
+   - Uses `filter_to_EUR_python.py` to create EUR-only data files
+   - Avoids ID matching issues between .fam and .keep files
 
-3. **No Variant Splitting**: Each job processes full genome (BOLT-LMM is efficient enough)
+3. **No Variant Splitting**: Each job processes full genome (~1.3M variants)
 
 4. **No Combining**: Results are final outputs directly from BOLT-LMM
 
-5. **Model SNPs**: r²<0.5 threshold chosen for HM3 data (~444K SNPs)
+5. **Model SNPs**: r²<0.5 threshold for HM3 data (~444K SNPs, 80GB RAM)
 
-6. **High Resources**: 150GB RAM, 100 CPUs ensures fast, stable computation
+6. **High Resources**: 150GB RAM, 100 CPUs per BOLT job ensures fast, stable computation
 
 ---
 
@@ -107,21 +114,26 @@ Each file contains **~1.3M variants** with BOLT-LMM association statistics.
 
 ```
 Day 1 Morning (9 AM):
-  Submit preprocessing (Steps 1-3)
+  Submit Step 1: Convert genotypes (autosomes only)
   
-Day 1 Afternoon (12 PM):
-  Preprocessing completes
-  Submit test run (Step 4)
+Day 1 Morning (9:15 AM):  
+  Step 1 completes
+  Run Step 2: Filter to EUR with Python (~3 min)
+  Submit Step 3: Create model SNPs
   
-Day 1 Late Afternoon (2-4 PM):
+Day 1 Morning (10 AM):
+  Steps 2-3 complete
+  Submit Step 4: Test run
+  
+Day 1 Afternoon (12-2 PM):
   Test completes and passes ✅
-  Submit full analysis (Step 5) - 6 jobs
+  Submit Step 5: Full analysis - 6 jobs
   
-Day 1 Evening (6-8 PM):
+Day 1 Evening (4-6 PM):
   All 6 jobs complete ✅
   Results ready for QC and downstream analysis!
 
-Total: ~9-11 hours from start to GWAS results
+Total: ~8-10 hours from start to GWAS results
 ```
 
 ---
