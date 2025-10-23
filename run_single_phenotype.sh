@@ -55,12 +55,14 @@ pheno_file_eur="${SRCDIR}/isolation_run_control.EUR.tsv.gz"
 covar_file_eur="${SRCDIR}/sqc.EUR.tsv.gz"
 
 # Set up covariates based on covar_str
+# Note: For multiple categorical covariates, BOLT needs separate --covarCol arguments
 if [ "${covar_str}" == "Day_NoPCs" ]; then
     qcovar_cols="age"
-    covar_cols="sex,array"
+    # Multiple categorical covariates specified separately
+    covar_col_args="--covarCol=sex --covarCol=array"
 elif [ "${covar_str}" == "Day_10PCs" ]; then
     qcovar_cols="age,UKB_PC1,UKB_PC2,UKB_PC3,UKB_PC4,UKB_PC5,UKB_PC6,UKB_PC7,UKB_PC8,UKB_PC9,UKB_PC10"
-    covar_cols="sex,array"
+    covar_col_args="--covarCol=sex --covarCol=array"
 else
     echo "ERROR: Unknown covar_str: ${covar_str}" >&2
     exit 1
@@ -70,7 +72,7 @@ echo "Configuration:"
 echo "  Genotype: ${genotype_bfile}"
 echo "  Phenotype: ${phenotype}"
 echo "  qCovariates: ${qcovar_cols}"
-echo "  Covariates: ${covar_cols}"
+echo "  Categorical covariates: sex, array"
 echo "  Model SNPs: ${model_snps_file} (~444K SNPs)"
 echo "  Output: ${out_file}.stats"
 echo ""
@@ -109,7 +111,7 @@ echo ""
         --phenoCol=${phenotype} \
         --covarFile=${covar_file_eur} \
         --qCovarCol=${qcovar_cols} \
-        --covarCol=${covar_cols} \
+        ${covar_col_args} \
         --covarMaxLevels=30 \
         --modelSnps=${model_snps_file} \
         --LDscoresFile=${ld_scores_file} \
