@@ -49,6 +49,11 @@ model_snps_file="${ukb21942_d}/geno/ukb_genoHM3/ukb_genoHM3_modelSNPs.txt"
 ld_scores_file="/home/mabdel03/data/software/BOLT-LMM_v2.5/tables/LDSCORE.1000G_EUR.GRCh38.tab.gz"
 genetic_map_file="/home/mabdel03/data/software/BOLT-LMM_v2.5/tables/genetic_map_hg19_withX.txt.gz"
 
+# Use EUR-filtered files (created by filter_to_EUR.sh)
+# This avoids ID matching issues with --remove
+pheno_file_eur="${SRCDIR}/isolation_run_control.EUR.tsv.gz"
+covar_file_eur="${SRCDIR}/sqc.EUR.tsv.gz"
+
 # Set up covariates based on covar_str
 if [ "${covar_str}" == "Day_NoPCs" ]; then
     qcovar_cols="age"
@@ -71,20 +76,17 @@ echo "  Output: ${out_file}.stats"
 echo ""
 
 # Verify all required files exist
-remove_file="${ukb21942_d}/sqc/population.20220316/${keep_set}.remove"
-
 echo "Verifying input files..."
 for file in "${genotype_bfile}.bed" "${genotype_bfile}.bim" "${genotype_bfile}.fam" \
-            "${ukb21942_d}/pheno/isolation_run_control.tsv.gz" \
-            "${ukb21942_d}/sqc/sqc.20220316.tsv.gz" \
-            "${remove_file}" \
+            "${pheno_file_eur}" \
+            "${covar_file_eur}" \
             "${model_snps_file}" \
             "${ld_scores_file}" \
             "${genetic_map_file}"; do
     if [ ! -f "$file" ]; then
         echo "ERROR: Required file not found: $file" >&2
-        if [[ "$file" == *".remove" ]]; then
-            echo "Create it by running: bash create_remove_file.sh" >&2
+        if [[ "$file" == *".EUR.tsv.gz" ]]; then
+            echo "Create EUR-filtered files by running: bash filter_to_EUR.sh" >&2
         fi
         exit 1
     fi
@@ -98,22 +100,14 @@ echo "This will analyze ~1.3M autosomal variants (full genome)"
 echo ""
 
     # BOLT-LMM command
-    # Using --remove to filter to EUR ancestry samples
-    # BOLT-LMM uses --remove (samples to exclude), not --keep (PLINK2-specific)
-    remove_file="${ukb21942_d}/sqc/population.20220316/${keep_set}.remove"
-    
-    if [ ! -f "${remove_file}" ]; then
-        echo "ERROR: Remove file not found: ${remove_file}" >&2
-        echo "Run: bash create_remove_file.sh to create it from EUR.keep" >&2
-        exit 1
-    fi
+    # Using EUR-filtered phenotype and covariate files (simpler than --remove)
+    # No need for --remove since files only contain EUR samples
     
     bolt \
         --bfile=${genotype_bfile} \
-        --remove=${remove_file} \
-        --phenoFile=${ukb21942_d}/pheno/isolation_run_control.tsv.gz \
+        --phenoFile=${pheno_file_eur} \
         --phenoCol=${phenotype} \
-        --covarFile=${ukb21942_d}/sqc/sqc.20220316.tsv.gz \
+        --covarFile=${covar_file_eur} \
         --qCovarCol=${qcovar_cols} \
         --covarCol=${covar_cols} \
         --covarMaxLevels=30 \
