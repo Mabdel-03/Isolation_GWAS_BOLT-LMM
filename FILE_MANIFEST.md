@@ -51,18 +51,34 @@ This directory contains a complete BOLT-LMM v2.5 GWAS analysis pipeline for bina
 
 ## Setup/Preparation Scripts
 
-### `create_remove_file.sh` ⭐ REQUIRED SETUP
-**Purpose**: Convert EUR.keep to EUR.remove for BOLT-LMM sample filtering  
-**Usage**: `bash create_remove_file.sh`  
-**When to run**: Once, after converting genotypes to bed format  
+### `create_EUR_MM_keep.sh` ⭐ REQUIRED SETUP
+**Purpose**: Create EUR_MM.keep by combining WB_MM and NBW_MM keep files  
+**Usage**: `bash create_EUR_MM_keep.sh`  
+**When to run**: Once, before filtering phenotype/covariate files  
 **Runtime**: <1 second  
 **What it does**:
-- Reads EUR.keep (EUR ancestry samples to keep)
-- Reads .fam file (all samples)
-- Creates EUR.remove (non-EUR samples to exclude)
-- BOLT-LMM uses --remove, not --keep (PLINK2-specific)  
-**Output**: `sqc/population.20220316/EUR.remove`  
-**Why needed**: Phenotype files contain all ancestries; this filters to EUR only
+- Combines WB_MM.keep (409,853 White British, includes related)
+- Combines NBW_MM.keep (16,749 Non-British White, includes related)
+- Creates EUR_MM.keep (**426,602 total EUR samples**)
+- **Includes related individuals** (appropriate for BOLT-LMM v2.5 mixed models)
+**Output**: `sqc/population.20220316/EUR_MM.keep`  
+**Why needed**: Maximizes sample size and power; BOLT handles relatedness via GRM
+
+### `filter_to_EUR_python.py` ⭐ REQUIRED PREPROCESSING  
+**Purpose**: Filter phenotype and covariate files to EUR_MM samples
+**Usage**: `python3 filter_to_EUR_python.py`
+**When to run**: After creating EUR_MM.keep
+**Runtime**: 2-3 minutes
+**What it does**:
+- Reads EUR_MM.keep (426,602 EUR samples)
+- Filters phenotype file to EUR_MM IIDs
+- Filters covariate file to EUR_MM IIDs  
+- Ensures headers start with "FID IID" (BOLT-LMM v2.5 requirement)
+**Output**: `isolation_run_control.EUR.tsv.gz`, `sqc.EUR.tsv.gz`
+**Why Python**: More robust than bash for data filtering
+
+### `create_remove_file.sh` (DEPRECATED - Not needed with EUR_MM approach)
+**Status**: No longer used - we pre-filter files instead of using --remove
 
 ## Preprocessing Scripts (SLURM Batch Jobs)
 

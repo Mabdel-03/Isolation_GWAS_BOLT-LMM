@@ -11,23 +11,31 @@ Before running the BOLT-LMM analysis on your HPC, complete the following steps:
 
 ## ✓ Pre-requisites
 
-- [ ] BOLT-LMM software installed on HPC
-- [ ] PLINK2 available in your conda environment
+- [ ] **BOLT-LMM v2.5** installed on HPC at `/home/mabdel03/data/software/BOLT-LMM_v2.5/`
+- [ ] PLINK2 available in conda environment `/home/mabdel03/data/conda_envs/bolt_lmm`
 - [ ] UK Biobank genotype data accessible
-- [ ] Phenotype file available: `pheno/isolation_run_control.tsv.gz`
-- [ ] Covariate file available: `sqc/sqc.20220316.tsv.gz`
-- [ ] Population keep/remove files: `sqc/population.20220316/EUR.keep` (or .remove)
+- [ ] Phenotype file: `pheno/isolation_run_control.tsv.gz` (all samples)
+- [ ] Covariate file: `sqc/sqc.20220316.tsv.gz` (all samples)
+- [ ] **Population files**: 
+  - [ ] `sqc/population.20220316/WB_MM.keep` (White British, includes related)
+  - [ ] `sqc/population.20220316/NBW_MM.keep` (Non-British White, includes related)
+  - [ ] `sqc/population.20220316/EUR_MM.keep` (Combined EUR, **426,602 samples**)
 
-## ✓ Step 1: Install BOLT-LMM
+## ✓ Step 1: Install BOLT-LMM v2.5
 
 ```bash
-# Download BOLT-LMM from:
-# https://alkesgroup.broadinstitute.org/BOLT-LMM/downloads/
+# Download BOLT-LMM v2.5 (June 2025 release - latest version)
+cd /home/mabdel03/data/software
+wget https://storage.googleapis.com/broad-alkesgroup-public/BOLT-LMM/downloads/BOLT-LMM_v2.5.tar.gz
+tar -xzf BOLT-LMM_v2.5.tar.gz
 
-# Extract and add to PATH
-wget https://alkesgroup.broadinstitute.org/BOLT-LMM/downloads/BOLT-LMM_v2.4.1.tar.gz
-tar -xzf BOLT-LMM_v2.4.1.tar.gz
-export PATH=/path/to/BOLT-LMM_v2.4.1/:$PATH
+# Add to PATH permanently
+echo 'export PATH="/home/mabdel03/data/software/BOLT-LMM_v2.5:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+# Verify installation
+bolt --help | head -5
+# Should show: BOLT-LMM, v2.5, June 21, 2025
 ```
 
 ## ✓ Step 2: Update Configuration Files
@@ -37,12 +45,12 @@ export PATH=/path/to/BOLT-LMM_v2.4.1/:$PATH
 Edit `isolation_run_control_BOLT/paths.sh`:
 
 ```bash
-# Set BOLT-LMM installation directory
-BOLT_LMM_DIR="/path/to/BOLT-LMM_v2.4.1"
+# BOLT-LMM v2.5 paths (already configured in paths.sh)
+BOLT_LMM_DIR="/home/mabdel03/data/software/BOLT-LMM_v2.5"
 BOLT_TABLES_DIR="${BOLT_LMM_DIR}/tables"
 
-# Check that these files exist:
-LD_SCORES_FILE="${BOLT_TABLES_DIR}/LDSCORE.1000G_EUR.tab.gz"
+# Verify these files exist:
+LD_SCORES_FILE="${BOLT_TABLES_DIR}/LDSCORE.1000G_EUR.GRCh38.tab.gz"
 GENETIC_MAP_FILE="${BOLT_TABLES_DIR}/genetic_map_hg19_withX.txt.gz"
 ```
 
