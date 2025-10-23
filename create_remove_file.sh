@@ -56,17 +56,28 @@ echo ""
 echo "Creating remove file..."
 
 # Extract FID IID from fam file (first two columns)
-awk '{print $1, $2}' "${fam_file}" > /tmp/all_samples.txt
+awk '{print $1"\t"$2}' "${fam_file}" > /tmp/all_samples.txt
 
-# Sort files for comm
-sort "${keep_file}" > /tmp/keep_sorted.txt
+# Ensure keep file has tab separation (convert spaces to tabs)
+awk '{print $1"\t"$2}' "${keep_file}" > /tmp/keep_formatted.txt
+
+# Sort files for comm (use tab as delimiter)
 sort /tmp/all_samples.txt > /tmp/all_sorted.txt
+sort /tmp/keep_formatted.txt > /tmp/keep_sorted.txt
+
+# Debug: show sample counts
+echo "DEBUG: Checking file formats..."
+echo "  First 3 lines from all_samples:"
+head -3 /tmp/all_sorted.txt | cat -A
+echo "  First 3 lines from keep_sorted:"
+head -3 /tmp/keep_sorted.txt | cat -A
 
 # Find samples in all_samples but NOT in keep file
+# comm -23: lines unique to file 1 (all) not in file 2 (keep)
 comm -23 /tmp/all_sorted.txt /tmp/keep_sorted.txt > "${remove_file}"
 
 # Clean up temp files
-rm /tmp/all_samples.txt /tmp/keep_sorted.txt /tmp/all_sorted.txt
+rm -f /tmp/all_samples.txt /tmp/keep_formatted.txt /tmp/keep_sorted.txt /tmp/all_sorted.txt
 
 # Verify output
 if [ -s "${remove_file}" ]; then
