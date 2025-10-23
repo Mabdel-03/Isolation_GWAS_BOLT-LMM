@@ -4,8 +4,8 @@
 #SBATCH --mem=150G
 #SBATCH -n 100
 #SBATCH --time=6:00:00
-#SBATCH --output=%x.%j.out
-#SBATCH --error=%x.%j.err
+#SBATCH --output=0c.out
+#SBATCH --error=0c.err
 #SBATCH --mail-user=mabdel03@mit.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
 
@@ -53,8 +53,8 @@ if [ ${test_exit} -eq 0 ]; then
     echo "🎉 TEST PASSED!"
     echo ""
     echo "Verification:"
-    ls -lh results/Day_NoPCs/EUR/bolt_Loneliness.Day_NoPCs.stats.gz
-    ls -lh results/Day_NoPCs/EUR/bolt_Loneliness.Day_NoPCs.log.gz
+    ls -lh results/Day_NoPCs/EUR/bolt_Loneliness.Day_NoPCs.stats.gz 2>/dev/null || echo "Stats file not found"
+    ls -lh results/Day_NoPCs/EUR/bolt_Loneliness.Day_NoPCs.log.gz 2>/dev/null || echo "Log file not found"
     echo ""
     echo "Next steps:"
     echo "1. Review the output files and log"
@@ -64,7 +64,7 @@ if [ ${test_exit} -eq 0 ]; then
     echo ""
 else
     echo "❌ TEST FAILED"
-    echo "Check error messages above"
+    echo "Check error messages above and in 0c.err"
     echo "Do NOT proceed to full analysis"
     exit 1
 fi

@@ -4,8 +4,8 @@
 #SBATCH --mem=80G
 #SBATCH -n 8
 #SBATCH --time=2:00:00
-#SBATCH --output=%x.%j.out
-#SBATCH --error=%x.%j.err
+#SBATCH --output=0b.out
+#SBATCH --error=0b.err
 #SBATCH --mail-user=mabdel03@mit.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
 

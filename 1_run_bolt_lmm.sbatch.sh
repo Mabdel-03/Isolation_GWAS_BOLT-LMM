@@ -4,8 +4,8 @@
 #SBATCH --mem=150G
 #SBATCH -n 100
 #SBATCH --time=47:00:00
-#SBATCH --output=%x.%A_%a.out
-#SBATCH --error=%x.%A_%a.err
+#SBATCH --output=1_%a.out
+#SBATCH --error=1_%a.err
 #SBATCH --array=1-6
 #SBATCH --mail-user=mabdel03@mit.edu
 #SBATCH --mail-type=BEGIN,END,FAIL,ARRAY_TASKS
