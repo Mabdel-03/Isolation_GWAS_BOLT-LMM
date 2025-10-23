@@ -5,11 +5,12 @@
 **BOLT-LMM version**: v2.5 (June 2025 release)  
 **Total Jobs**: 6 (not 138!)  
 **Resources per job**: 150GB RAM, 100 CPUs (multithreading enabled), 47h limit  
-**Actual runtime**: 2-3 hours per job  
-**Sample size**: ~426K EUR samples (includes related individuals via EUR_MM.keep)  
+**Actual runtime**: **8-12 hours per job** (full genome, 426K samples)  
+**Sample size**: **426,602 EUR samples** (EUR_MM.keep: includes 73K related individuals)  
 **Output location**: `Isolation_GWAS_BOLT-LMM/results/`  
 **Ancestry**: European (WB_MM + NBW_MM, including relatives - appropriate for mixed models)  
-**Chromosomes**: Autosomes 1-22 only (BOLT v2.5 limitation)
+**Chromosomes**: Autosomes 1-22 only (BOLT v2.5 limitation)  
+**Test**: Optional - can skip and run all 6 jobs directly
 
 ---
 
@@ -48,26 +49,29 @@ conda activate /home/mabdel03/data/conda_envs/bolt_lmm
   # Autosomes only (chr 1-22)
   ```
 
-### ✅ Validation
+### ✅ Analysis (Skip Test, Run All 6 Jobs Directly - RECOMMENDED)
 
-- [ ] **Step 4**: Test run (1 of 6 jobs) - after Steps 1-3 complete
-  ```bash
-  sbatch 0c_test_simplified.sbatch.sh
-  # Wait ~1-2 hours
-  # Tests: Loneliness + Day_NoPCs on full genome with EUR samples
-  # Uses EUR-filtered files (no --remove needed)
-  # Check: grep "TEST PASSED" bolt_test_simple.*.out
-  # ⚠️ Must pass before Step 5!
-  ```
-
-### ✅ Full Analysis
-
-- [ ] **Step 5**: Submit all 6 jobs
+- [ ] **Step 4**: Submit all 6 jobs (no test needed - we've debugged thoroughly)
   ```bash
   sbatch 1_run_bolt_lmm.sbatch.sh
   # Submits array job with 6 tasks
-  # All run concurrently
+  # Each: Full genome, 426K EUR_MM samples
+  # Runtime: 8-12 hours per task
+  # All 6 run concurrently (if resources available)
   ```
+
+### Alternative: Run Test First (Optional)
+
+- [ ] **Step 4a** (Optional): Test with 1 phenotype
+  ```bash
+  sbatch 0c_test_simplified.sbatch.sh
+  # Runs: Loneliness + Day_NoPCs
+  # Runtime: 8-12 hours (same as any final job!)
+  # Check: grep "TEST PASSED" 0c.out
+  # Then: sbatch 1_run_bolt_lmm.sbatch.sh (submit other 5)
+  ```
+
+**Recommendation**: Skip test, run all 6 directly (faster to results)
 
 ### ✅ Results
 
@@ -117,51 +121,62 @@ Each file contains **~1.3M variants** with BOLT-LMM association statistics.
 
 ## ⏱️ Expected Timeline
 
+### Option A: Skip Test (RECOMMENDED - Faster)
+
 ```
 Day 1 Morning (9 AM):
-  Submit Step 1: Convert genotypes (autosomes only)
-  
-Day 1 Morning (9:15 AM):  
-  Step 1 completes
-  Run Step 2: Filter to EUR with Python (~3 min)
-  Submit Step 3: Create model SNPs
+  Submit preprocessing: 0a, 0b
+  Run: python3 filter_to_EUR_python.py
   
 Day 1 Morning (10 AM):
-  Steps 2-3 complete
-  Submit Step 4: Test run
+  Preprocessing complete
+  Submit all 6 jobs: sbatch 1_run_bolt_lmm.sbatch.sh
   
-Day 1 Afternoon (12-2 PM):
-  Test completes and passes ✅
-  Submit Step 5: Full analysis - 6 jobs
-  
-Day 1 Evening (4-6 PM):
-  All 6 jobs complete ✅
-  Results ready for QC and downstream analysis!
+Day 1 Evening (6-10 PM):
+  All 6 jobs complete ✅ (8-12 hours runtime)
+  Results ready!
 
-Total: ~8-10 hours from start to GWAS results
+Total: ~9-13 hours from start to results
 ```
+
+### Option B: With Test (Conservative)
+
+```
+Day 1 Morning: Preprocessing (~1h)
+Day 1 10 AM: Submit test (0c)
+Day 1 Evening (6-10 PM): Test completes (8-12h)
+Day 2 Morning: Submit remaining 5 jobs
+Day 2 Evening: All complete
+
+Total: ~1.5-2 days
+```
+
+**Recommendation**: Option A (skip test) - faster and we've thoroughly debugged!
 
 ---
 
-## 🚀 Minimal Command Sequence
+## 🚀 Minimal Command Sequence (Skip Test - RECOMMENDED)
 
 ```bash
-# Assuming you're starting fresh:
+# Complete workflow in one day:
 cd Isolation_GWAS_BOLT-LMM
 conda activate /home/mabdel03/data/conda_envs/bolt_lmm
 
-sbatch 0a_convert_to_bed.sbatch.sh && \
-sleep 600 && \
-bash create_remove_file.sh && \
+# Preprocessing (~1 hour)
+sbatch 0a_convert_to_bed.sbatch.sh
+# Wait ~10 min, then:
+bash create_EUR_MM_keep.sh  # Create EUR_MM.keep
+python3 filter_to_EUR_python.py  # Filter to 426K EUR samples (~3 min)
 sbatch 0b_prepare_model_snps.sbatch.sh
+# Wait ~30 min for model SNPs
 
-# Wait ~45 min total, then:
-sbatch 0c_test_simplified.sbatch.sh
-
-# Wait ~2h, verify test passed, then:
+# Full analysis (all 6 jobs at once)
 sbatch 1_run_bolt_lmm.sbatch.sh
 
-# Done! Results appear in ~2h
+# Wait ~8-12 hours
+# Results ready! All 6 files in results/ directory
+ls -lh results/Day_NoPCs/EUR/
+ls -lh results/Day_10PCs/EUR/
 ```
 
 ---
