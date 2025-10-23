@@ -61,7 +61,11 @@ def main():
     ukb21942_d = '/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942'
     srcdir = '/home/mabdel03/data/files/Isolation_Genetics/GWAS/Scripts/ukb21942/Isolation_GWAS_BOLT-LMM'
     
-    keep_file = f'{ukb21942_d}/sqc/population.20220316/EUR.keep'
+    # Use EUR_MM.keep (includes related individuals - appropriate for BOLT-LMM)
+    # EUR_MM.keep: ~426K EUR samples (WB_MM + NBW_MM, includes related)
+    # EUR.keep: ~353K EUR samples (unrelated only)
+    # BOLT-LMM can handle related individuals via GRM, so use EUR_MM for more power
+    keep_file = f'{ukb21942_d}/sqc/population.20220316/EUR_MM.keep'
     pheno_in = f'{ukb21942_d}/pheno/isolation_run_control.tsv.gz'
     covar_in = f'{ukb21942_d}/sqc/sqc.20220316.tsv.gz'
     
@@ -69,7 +73,8 @@ def main():
     covar_out = f'{srcdir}/sqc.EUR.tsv.gz'
     
     print("=" * 60)
-    print("Filter Phenotype & Covariate Files to EUR (Python)")
+    print("Filter to EUR (Including Related Individuals)")
+    print("Using EUR_MM.keep for BOLT-LMM Mixed Models")
     print("=" * 60)
     print()
     
