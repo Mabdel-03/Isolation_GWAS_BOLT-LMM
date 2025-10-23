@@ -24,7 +24,7 @@ batch_size=1 # the number of jobs executed in an array task in SLURM.
 # Increased memory and threads for BOLT-LMM
 # Using kellis partition as requested
 # Resources increased for large-scale analysis: 100GB RAM, 100 tasks, 47 hours
-sbatch_resources_str='-p kellis --mem=100G -n 100 --nodes=1 --time=47:00:00'
+sbatch_resources_str='-p kellis --mem=100G -n 100 --time=47:00:00'
 # http://rous.mit.edu/index.php/Luria#User_job_limitations
 
 # log directory

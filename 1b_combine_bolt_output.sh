@@ -15,7 +15,7 @@ slurm_log_d="${SRCDIR}/.slurm_logs"
 slurm_job_name=$(basename ${SRCNAME%.sh}).$(basename ${SRCDIR})
 job_list_sh=${slurm_log_d}/${slurm_job_name}.jobs.$(date +%Y%m%d-%H%M%S).sh
 batch_size=1
-sbatch_resources_str='-p kellis --mem=15000 --ntasks=2 --nodes=1 --time=1-23:55:00 --exclude=b[1-4],c[5-22] --nice=1000'
+sbatch_resources_str='-p kellis --mem=15000 --ntasks=2 --time=1-23:55:00'
 
 # directories
 if [ ! -d "${slurm_log_d}" ] ; then mkdir -p "${slurm_log_d}" ; fi
