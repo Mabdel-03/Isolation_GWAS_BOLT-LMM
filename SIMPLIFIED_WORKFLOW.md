@@ -4,6 +4,10 @@
 
 This is the **streamlined workflow** - much simpler and more efficient than the original 138-job variant-split approach.
 
+**BOLT-LMM Version**: v2.5 (June 2025 release - latest)  
+**Sample Size**: 426,602 EUR individuals (includes related - appropriate for mixed models)  
+**Multithreading**: 100 threads per job (12.5× typical usage)  
+
 **Key Simplification**: Each job processes the **full genome** (~1.3M autosomal variants) for one phenotype-covariate combination.
 
 ---
@@ -37,12 +41,13 @@ conda activate /home/mabdel03/data/conda_envs/bolt_lmm
 sbatch 0a_convert_to_bed.sbatch.sh
 # Wait ~5-10 min, creates ukb_genoHM3_bed.bed/bim/fam (~145GB, autosomes only)
 
-# 1b. Filter phenotype and covariate files to EUR ancestry
+# 1b. Filter phenotype and covariate files to EUR ancestry (including related)
 python3 filter_to_EUR_python.py
 # Takes ~2-3 minutes
-# Creates: isolation_run_control.EUR.tsv.gz (~353K EUR samples)
-# Creates: sqc.EUR.tsv.gz (~353K EUR samples)
-# Simpler than --remove (avoids ID matching issues)
+# Uses EUR_MM.keep: 426,602 EUR samples (WB_MM + NBW_MM, includes related)
+# Creates: isolation_run_control.EUR.tsv.gz (~420K EUR samples)
+# Creates: sqc.EUR.tsv.gz (~426K EUR samples)
+# Includes related individuals - BOLT-LMM v2.5 handles via GRM
 
 # 1c. Create model SNPs (after 1a completes)
 sbatch 0b_prepare_model_snps.sbatch.sh

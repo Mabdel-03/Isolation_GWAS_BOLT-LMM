@@ -16,13 +16,18 @@
 
 ## What You Have
 
-A complete, ready-to-run BOLT-LMM GWAS pipeline for **binary phenotypes** based on:
+A complete, ready-to-run **BOLT-LMM v2.5** GWAS pipeline for **binary phenotypes** based on:
 
 > **Day, F.R., et al. (2018)**  
 > "Elucidating the genetic basis of social interaction and isolation"  
 > Nature Communications
 
-**Optimized for**: MIT Luria HPC (kellis partition), UK Biobank scale (~500K samples)
+**Configuration**:
+- **BOLT-LMM v2.5** (June 2025 release - latest version)
+- **Sample size**: ~426,600 EUR individuals (includes related via EUR_MM.keep)  
+- **Multithreading**: 100 threads per job (optimized performance)
+- **Platform**: MIT Luria HPC (kellis partition)
+- **Resources**: 150GB RAM, 100 CPUs per job
 
 ## ⚠️ Critical Information: BINARY PHENOTYPES
 
