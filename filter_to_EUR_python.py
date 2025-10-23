@@ -18,14 +18,26 @@ def read_keep_ids(keep_file):
                 eur_ids.add(iid)
     return eur_ids
 
-def filter_file(input_file, output_file, eur_ids):
+def filter_file(input_file, output_file, eur_ids, ensure_fid_iid_header=False):
     """Filter a gzipped TSV file to EUR samples only"""
     n_in = 0
     n_out = 0
     
     with gzip.open(input_file, 'rt') as fin, gzip.open(output_file, 'wt') as fout:
-        # Read and write header
+        # Read header
         header = fin.readline()
+        header_parts = header.strip().split('\t')
+        
+        # BOLT-LMM requires "FID IID" as first two columns
+        if ensure_fid_iid_header:
+            if header_parts[0] != 'FID' or header_parts[1] != 'IID':
+                # Fix header if needed
+                print(f"  NOTE: Adjusting header to start with 'FID IID'", file=sys.stderr)
+                print(f"    Original: {header_parts[0]} {header_parts[1]}", file=sys.stderr)
+                header_parts[0] = 'FID'
+                header_parts[1] = 'IID'
+                header = '\t'.join(header_parts) + '\n'
+        
         fout.write(header)
         
         # Process data rows
@@ -71,15 +83,15 @@ def main():
     print(f"Filtering phenotype file...")
     print(f"  Input:  {pheno_in}")
     print(f"  Output: {pheno_out}")
-    n_pheno_in, n_pheno_out = filter_file(pheno_in, pheno_out, eur_ids)
+    n_pheno_in, n_pheno_out = filter_file(pheno_in, pheno_out, eur_ids, ensure_fid_iid_header=True)
     print(f"  ✓ Complete: {n_pheno_in} input → {n_pheno_out} EUR samples")
     print()
     
-    # Filter covariate file
+    # Filter covariate file (BOLT requires "FID IID" header)
     print(f"Filtering covariate file...")
     print(f"  Input:  {covar_in}")
     print(f"  Output: {covar_out}")
-    n_covar_in, n_covar_out = filter_file(covar_in, covar_out, eur_ids)
+    n_covar_in, n_covar_out = filter_file(covar_in, covar_out, eur_ids, ensure_fid_iid_header=True)
     print(f"  ✓ Complete: {n_covar_in} input → {n_covar_out} EUR samples")
     print()
     
