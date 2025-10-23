@@ -37,9 +37,12 @@ conda activate /home/mabdel03/data/conda_envs/bolt_lmm
 sbatch 0a_convert_to_bed.sbatch.sh
 # Wait ~5-10 min, creates ukb_genoHM3_bed.bed/bim/fam (~145GB, autosomes only)
 
-# 1b. Create EUR.remove file from EUR.keep (BOLT-LMM uses --remove, not --keep)
-bash create_remove_file.sh
-# Takes <1 second, creates EUR.remove (samples to exclude)
+# 1b. Filter phenotype and covariate files to EUR ancestry
+python3 filter_to_EUR_python.py
+# Takes ~2-3 minutes
+# Creates: isolation_run_control.EUR.tsv.gz (~353K EUR samples)
+# Creates: sqc.EUR.tsv.gz (~353K EUR samples)
+# Simpler than --remove (avoids ID matching issues)
 
 # 1c. Create model SNPs (after 1a completes)
 sbatch 0b_prepare_model_snps.sbatch.sh
@@ -129,16 +132,16 @@ results/
 | Step | Script | RAM | Tasks | Time | Jobs |
 |------|--------|-----|-------|------|------|
 | Convert | `0a_convert_to_bed.sbatch.sh` | 32GB | 8 | ~10m | 1 |
-| Create .remove | `create_remove_file.sh` | - | - | <1s | - |
+| EUR filter | `filter_to_EUR_python.py` | - | - | ~3m | - |
 | Model SNPs | `0b_prepare_model_snps.sbatch.sh` | 80GB | 8 | ~30m | 1 |
 | Test | `0c_test_simplified.sbatch.sh` | 150GB | 100 | ~2h | 1 |
 | **Full** | `1_run_bolt_lmm.sbatch.sh` | **150GB** | **100** | ~2h each | **6** |
 
-**Total**: 9 steps (3 preprocessing + 1 test + 1 array of 6)  
-**Wall time**: ~1 day (all 6 can run concurrently)  
+**Total**: 5 setup steps + 6 analysis jobs  
+**Wall time**: ~1 day (preprocessing ~1h, all 6 analysis jobs run concurrently)  
 **Vs. old approach**: 138 jobs over 3-4 days!
 
-**Key**: The `.remove` file filters phenotype data to EUR ancestry only (BOLT-LMM requirement)
+**Key**: Pre-filtering phenotype/covariate files to EUR (simpler and more reliable than --remove)
 
 ---
 
@@ -183,11 +186,12 @@ conda activate /home/mabdel03/data/conda_envs/bolt_lmm
 
 # Preprocessing (one-time setup)
 sbatch 0a_convert_to_bed.sbatch.sh      # Convert genotypes (chr 1-22), ~10 min
-bash create_remove_file.sh               # Create EUR.remove from EUR.keep, <1 sec
+python3 filter_to_EUR_python.py          # Filter pheno/covar to EUR, ~3 min
 sbatch 0b_prepare_model_snps.sbatch.sh  # Create ~444K model SNPs, ~30 min
 
 # Test (REQUIRED - validates EUR filtering and full pipeline)
-sbatch 0c_test_simplified.sbatch.sh     # Full genome test with EUR samples, ~2 hours
+sbatch 0c_test_simplified.sbatch.sh     # Full genome test with EUR-filtered files, ~2 hours
+# Uses pre-filtered isolation_run_control.EUR.tsv.gz and sqc.EUR.tsv.gz
 # Check: grep "TEST PASSED" bolt_test_simple.*.out
 
 # Full analysis (if test passes)
