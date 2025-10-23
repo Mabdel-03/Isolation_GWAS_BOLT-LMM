@@ -7,6 +7,8 @@
 #SBATCH --output=%x.%A_%a.out
 #SBATCH --error=%x.%A_%a.err
 #SBATCH --array=1-6
+#SBATCH --mail-user=mabdel03@mit.edu
+#SBATCH --mail-type=BEGIN,END,FAIL,ARRAY_TASKS
 
 set -beEo pipefail
 

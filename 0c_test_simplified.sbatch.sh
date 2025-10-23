@@ -6,6 +6,8 @@
 #SBATCH --time=6:00:00
 #SBATCH --output=%x.%j.out
 #SBATCH --error=%x.%j.err
+#SBATCH --mail-user=mabdel03@mit.edu
+#SBATCH --mail-type=BEGIN,END,FAIL
 
 set -beEo pipefail
 
