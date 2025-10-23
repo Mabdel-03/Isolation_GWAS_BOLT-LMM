@@ -3,7 +3,7 @@
 #SBATCH --partition=kellis
 #SBATCH --mem=150G
 #SBATCH -n 100
-#SBATCH --time=6:00:00
+#SBATCH --time=47:00:00
 #SBATCH --output=0c.out
 #SBATCH --error=0c.err
 #SBATCH --mail-user=mabdel03@mit.edu
