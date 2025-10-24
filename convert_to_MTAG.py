@@ -27,55 +27,39 @@ def load_rsid_mapping(annot_file):
     """
     print(f"Loading rsID mapping from: {annot_file}")
     
-    # Read annotation file with low_memory=False to avoid dtype warnings
+    # Read annotation file - appears to have no header based on column output
+    # Columns seem to be: CHR, POS, ID (chr:pos:ref:alt), REF, ALT, QUAL, FILTER, rsID, ...
     df_annot = pd.read_csv(annot_file, sep='\t', compression='gzip', 
-                           comment='#', low_memory=False)
+                           header=None, low_memory=False)
     
-    print(f"  Columns in annotation file: {list(df_annot.columns[:10])}")
+    print(f"  First row (inferred structure): {list(df_annot.iloc[0, :10])}")
+    print(f"  Total rows: {len(df_annot):,}")
     
-    # Find rsID column (could be 'Existing_variation', 'rsid', or in INFO field)
-    rsid_col = None
-    if 'Existing_variation' in df_annot.columns:
-        rsid_col = 'Existing_variation'
-    elif 'ID' in df_annot.columns and df_annot['ID'].str.startswith('rs').any():
-        # If ID column contains rsIDs
-        rsid_col = 'ID'
-    elif 'INFO' in df_annot.columns:
-        # Parse rsID from INFO field
-        print("  Note: Extracting rsID from INFO field")
-        df_annot['rsid_from_info'] = df_annot['INFO'].str.extract(r'RS=([^;]+)')
-        rsid_col = 'rsid_from_info'
+    # Based on your output, the file structure appears to be:
+    # Col 0: CHR (e.g., '1')
+    # Col 1: POS (e.g., '756604')
+    # Col 2: ID (e.g., '1:756604:A:G')
+    # Col 3: REF (e.g., 'A')
+    # Col 4: ALT (e.g., 'G')
+    # Col 5: QUAL (e.g., 'PASS')
+    # Col 6: FILTER (e.g., 'array_both')
+    # Col 7: rsID (e.g., 'rs3131962')
     
-    if rsid_col is None:
-        print("  WARNING: No rsID column found. Will use chr:pos:ref:alt IDs")
-        return {}
+    # Create variant ID from columns 0,1,3,4 (chr:pos:ref:alt)
+    df_annot['variant_id'] = (df_annot[0].astype(str) + ':' + 
+                               df_annot[1].astype(str) + ':' +
+                               df_annot[3].astype(str) + ':' +
+                               df_annot[4].astype(str))
     
-    print(f"  Using column: {rsid_col}")
+    # rsID is in column 7, filter to rows where it starts with 'rs'
+    df_with_rsid = df_annot[df_annot[7].astype(str).str.startswith('rs', na=False)]
     
-    # Create lookup: ID (chr:pos:ref:alt) -> rsID
-    # Take first rsID if multiple (separated by ;)
-    # The ID column should be chr:pos:ref:alt format
-    id_col = '#CHROM' if '#CHROM' in df_annot.columns else 'ID'
-    
-    # Build chr:pos:ref:alt ID from CHROM, POS, REF, ALT if needed
-    if 'POS' in df_annot.columns:
-        df_annot['variant_id'] = (df_annot['#CHROM'].astype(str) + ':' + 
-                                   df_annot['POS'].astype(str) + ':' +
-                                   df_annot['REF'].astype(str) + ':' +
-                                   df_annot['ALT'].astype(str))
-        id_col = 'variant_id'
-    
-    lookup = (
-        df_annot
-        .dropna(subset=[rsid_col])
-        .assign(rsid=lambda d: d[rsid_col].astype(str)
-                               .str.split(';').str[0].str.strip())
-        [['variant_id' if id_col == 'variant_id' else 'ID', 'rsid']]
-        .set_index(id_col)['rsid']
-        .to_dict()
-    )
+    # Create lookup dictionary
+    lookup = df_with_rsid.set_index('variant_id')[7].to_dict()
     
     print(f"  Loaded {len(lookup):,} rsID mappings")
+    print(f"  Coverage: {100*len(lookup)/len(df_annot):.1f}% of variants have rsIDs")
+    
     return lookup
 
 def get_sample_size(pheno_file, pheno_col):
@@ -98,6 +82,17 @@ def convert_bolt_to_mtag(bolt_file, rsid_lookup, trait_name, sample_size, output
     # Read BOLT-LMM output
     df_bolt = pd.read_csv(bolt_file, sep='\t', compression='gzip')
     print(f"  Variants in BOLT file: {len(df_bolt):,}")
+    print(f"  Columns in BOLT file: {list(df_bolt.columns)}")
+    
+    # Determine which p-value column to use
+    if 'P_BOLT_LMM' in df_bolt.columns:
+        pval_col = 'P_BOLT_LMM'
+        print(f"  Using P_BOLT_LMM (non-infinitesimal model)")
+    elif 'P_BOLT_LMM_INF' in df_bolt.columns:
+        pval_col = 'P_BOLT_LMM_INF'
+        print(f"  Using P_BOLT_LMM_INF (infinitesimal model - P_BOLT_LMM not available)")
+    else:
+        raise ValueError("No p-value column found in BOLT output!")
     
     # Convert to MTAG format
     df_mtag = pd.DataFrame({
@@ -108,7 +103,7 @@ def convert_bolt_to_mtag(bolt_file, rsid_lookup, trait_name, sample_size, output
         'a2': df_bolt['ALLELE0'],
         'freq': df_bolt['A1FREQ'],
         'z': df_bolt['BETA'] / df_bolt['SE'],  # Z-score
-        'pval': df_bolt['P_BOLT_LMM'],
+        'pval': df_bolt[pval_col],
         'n': sample_size  # Constant for all variants
     })
     
