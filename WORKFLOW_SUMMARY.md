@@ -73,13 +73,22 @@ conda activate /home/mabdel03/data/conda_envs/bolt_lmm
 
 **Recommendation**: Skip test, run all 6 directly (faster to results)
 
-### ✅ Results
+### ✅ Results & Post-Processing
 
-- [ ] **Step 6**: Check outputs
+- [ ] **Step 5**: Check BOLT-LMM outputs
   ```bash
   ls -lh results/Day_NoPCs/EUR/bolt_*.stats.gz
   ls -lh results/Day_10PCs/EUR/bolt_*.stats.gz
   # Should see 6 files (3 phenotypes × 2 covariate sets)
+  ```
+
+- [ ] **Step 6**: Convert to MTAG format
+  ```bash
+  bash 2_mtag_conversion.sh
+  # Converts BOLT outputs → MTAG format
+  # Maps chr:pos:ref:alt → rsIDs (98% coverage)
+  # Creates: MTAG_Inputs/*.mtag.sumstats.txt
+  # Ready for multi-trait analysis
   ```
 
 ---

@@ -69,6 +69,25 @@
 
 ---
 
+### Post-Processing (MTAG Preparation)
+
+**2_mtag_conversion.sh**
+- Wrapper for MTAG format conversion
+- Checks for BOLT-LMM results
+- Calls convert_to_MTAG.py
+- Reports conversion status
+- Runtime: 2-5 minutes
+- Run after: BOLT-LMM jobs complete
+
+**convert_to_MTAG.py**
+- Converts BOLT → MTAG format
+- Maps chr:pos:ref:alt → rsIDs (98% coverage)
+- Calculates z-scores (BETA/SE)
+- Detects sample sizes automatically
+- Creates: MTAG_Inputs/*.mtag.sumstats.txt
+
+---
+
 ### Diagnostic & Utility Scripts
 
 **check_sample_overlap.sh**
@@ -130,8 +149,11 @@ bash create_EUR_MM_keep.sh
 python3 filter_to_EUR_python.py
 sbatch 0b_prepare_model_snps.sbatch.sh
 
-# Analysis (all 6 jobs)
+# Analysis (all 6 BOLT-LMM jobs)
 sbatch 1_run_bolt_lmm.sbatch.sh
+
+# Post-processing (after BOLT completes)
+bash 2_mtag_conversion.sh
 
 # Optional: Test first
 sbatch 0c_test_simplified.sbatch.sh  # Then: sbatch 1_run...

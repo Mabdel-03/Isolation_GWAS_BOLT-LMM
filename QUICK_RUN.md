@@ -62,7 +62,7 @@ Runtime: 8-12 hours each
 
 ---
 
-## ✅ Success Check
+## ✅ Success Check & MTAG Conversion
 
 After ~8-12 hours:
 
@@ -71,7 +71,7 @@ After ~8-12 hours:
 squeue -u $USER
 # Should show: no jobs running
 
-# All 6 results created?
+# All 6 BOLT results created?
 ls results/Day_NoPCs/EUR/
 ls results/Day_10PCs/EUR/
 
@@ -82,9 +82,18 @@ ls results/Day_10PCs/EUR/
 # Check file sizes (should be 1-5GB each)
 ls -lh results/*/EUR/*.stats.gz
 
-# Count variants in one file
-zcat results/Day_NoPCs/EUR/bolt_Loneliness.Day_NoPCs.stats.gz | wc -l
-# Should show: ~1,300,001 (1.3M variants + 1 header)
+# === STEP 2: Convert to MTAG Format ===
+
+bash 2_mtag_conversion.sh
+
+# Creates MTAG_Inputs/ with .mtag.sumstats.txt files
+# - Maps variants to rsIDs (98% coverage)
+# - Formats for multi-trait analysis
+# - 6 output files (~80MB each)
+
+# Verify MTAG files
+ls -lh MTAG_Inputs/
+# Should see up to 6 .mtag.sumstats.txt files
 ```
 
 ---
