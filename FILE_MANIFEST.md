@@ -1,53 +1,50 @@
-# File Manifest: isolation_run_control_BOLT
+# File Manifest: Isolation_GWAS_BOLT-LMM
 
 ## Overview
-This directory contains a complete BOLT-LMM v2.5 GWAS analysis pipeline for binary social isolation phenotypes. The pipeline implements the methodology from Day et al. (2018) "Elucidating the genetic basis of social interaction and isolation" using SLURM batch jobs on the MIT Luria HPC cluster (kellis partition).
+This directory contains a streamlined BOLT-LMM v2.5 GWAS pipeline for binary social isolation phenotypes. The pipeline implements the methodology from Day et al. (2018) using a simplified 6-job workflow on the MIT Luria HPC cluster (kellis partition).
 
-## Main Analysis Scripts
-
-### `bolt_lmm.sh` ⭐ CORE SCRIPT
-**Purpose**: Main script that runs BOLT-LMM for a single variant split  
-**Usage**: `bash bolt_lmm.sh <analysis_name> <out_suffix> <pheno_cols> <threads> <memory> <covar_str> <keep_set> <idx>`  
-**Example**: `bash bolt_lmm.sh isolation_run_control BOLT 5,6,9 8 40000 Day_NoPCs EUR 1`  
-**What it does**:
-- Runs BOLT-LMM for 3 phenotypes (Loneliness, FreqSoc, AbilityToConfide)
-- Applies specified covariate model
-- Processes one variant split at a time
-- Outputs .stats.gz and .log.gz files
-
-### `1_run_bolt_lmm.sbatch.sh` ⭐ SIMPLIFIED WORKFLOW (RECOMMENDED)
-**Purpose**: Simplified array job submission for SLURM cluster  
-**Usage**: `sbatch 1_run_bolt_lmm.sbatch.sh`  
-**What it does**:
-- Submits array job with 6 tasks (3 phenotypes × 2 covariate sets)
-- Each task processes full genome for one phenotype-covariate combo
-- All tasks can run concurrently
+**Key Features**:
+- 6 jobs total (not 138)
+- 426,602 EUR samples (includes 73K related individuals)
+- 100 threads multithreading
+- No variant splitting
 - No combining step needed
 
-### `1a_bolt_lmm.sbatch.sh` (DEPRECATED - Old 138-job workflow)
-**Purpose**: Legacy job submission with variant splitting  
-**Status**: Deprecated - use `1_run_bolt_lmm.sbatch.sh` instead  
-**Note**: This was the old approach with 69 variant splits
+---
 
-### `1b_combine_bolt_output.sh`
-**Purpose**: Orchestrates combining results from all variant splits  
-**Usage**: `bash 1b_combine_bolt_output.sh`  
+## 🚀 Main Analysis Scripts
+
+### `1_run_bolt_lmm.sbatch.sh` ⭐ PRIMARY ANALYSIS SCRIPT
+**Purpose**: Main SLURM array job for all 6 GWAS analyses  
+**Usage**: `sbatch 1_run_bolt_lmm.sbatch.sh`  
+**Resources**: 150GB RAM, 100 CPUs, 47h per task  
 **What it does**:
-- Submits jobs to combine logs and statistics
-- Runs for all covariate sets and phenotypes
-- Creates final combined output files
+- Submits array job with 6 tasks (3 phenotypes × 2 covariate sets)
+- Each task processes full genome (~1.3M variants)
+- Each task analyzes 426K EUR_MM samples
+- All 6 tasks run concurrently
+- **This is the main script to run!**
 
-## Helper Scripts
+**Output files**: `1_1.out` through `1_6.out` (and corresponding .err files)
 
-### `combine_bolt_logs.sh`
-**Purpose**: Combines log files from variant splits  
-**Usage**: `bash combine_bolt_logs.sh <analysis_name> <covar_str> <keep_set>`  
-**Example**: `bash combine_bolt_logs.sh isolation_run_control Day_NoPCs EUR`
+**Job mapping**:
+- Task 1: Loneliness + Day_NoPCs
+- Task 2: FreqSoc + Day_NoPCs  
+- Task 3: AbilityToConfide + Day_NoPCs
+- Task 4: Loneliness + Day_10PCs
+- Task 5: FreqSoc + Day_10PCs
+- Task 6: AbilityToConfide + Day_10PCs
 
-### `combine_bolt_sumstats.sh`
-**Purpose**: Combines summary statistics from variant splits  
-**Usage**: `bash combine_bolt_sumstats.sh <analysis_name> <covar_str> <keep_set> <trait>`  
-**Example**: `bash combine_bolt_sumstats.sh isolation_run_control Day_NoPCs EUR Loneliness`
+### `run_single_phenotype.sh` (Worker Script)
+**Purpose**: Runs BOLT-LMM for one phenotype-covariate combination  
+**Usage**: Called automatically by `1_run_bolt_lmm.sbatch.sh`  
+**Can also run directly**: `bash run_single_phenotype.sh <phenotype> <covar_str>`  
+**Example**: `bash run_single_phenotype.sh Loneliness Day_NoPCs`  
+**What it does**:
+- Loads EUR_MM-filtered phenotype and covariate files
+- Runs BOLT-LMM v2.5 with 100 threads
+- Processes full genome (1.3M autosomal variants)
+- Creates final output directly (no combining needed)
 
 ## Setup/Preparation Scripts
 
