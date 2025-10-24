@@ -55,13 +55,16 @@ pheno_file_eur="${SRCDIR}/isolation_run_control.EUR.tsv.gz"
 covar_file_eur="${SRCDIR}/sqc.EUR.tsv.gz"
 
 # Set up covariates based on covar_str
-# Note: For multiple categorical covariates, BOLT needs separate --covarCol arguments
+# Note: BOLT needs separate arguments for each covariate (both categorical and quantitative)
 if [ "${covar_str}" == "Day_NoPCs" ]; then
-    qcovar_cols="age"
-    # Multiple categorical covariates specified separately
+    # Quantitative: age only
+    qcovar_col_args="--qCovarCol=age"
+    # Categorical: sex and array
     covar_col_args="--covarCol=sex --covarCol=array"
 elif [ "${covar_str}" == "Day_10PCs" ]; then
-    qcovar_cols="age,UKB_PC1,UKB_PC2,UKB_PC3,UKB_PC4,UKB_PC5,UKB_PC6,UKB_PC7,UKB_PC8,UKB_PC9,UKB_PC10"
+    # Quantitative: age and 10 PCs (each specified separately)
+    qcovar_col_args="--qCovarCol=age --qCovarCol=UKB_PC1 --qCovarCol=UKB_PC2 --qCovarCol=UKB_PC3 --qCovarCol=UKB_PC4 --qCovarCol=UKB_PC5 --qCovarCol=UKB_PC6 --qCovarCol=UKB_PC7 --qCovarCol=UKB_PC8 --qCovarCol=UKB_PC9 --qCovarCol=UKB_PC10"
+    # Categorical: sex and array
     covar_col_args="--covarCol=sex --covarCol=array"
 else
     echo "ERROR: Unknown covar_str: ${covar_str}" >&2
@@ -110,7 +113,7 @@ echo ""
         --phenoFile=${pheno_file_eur} \
         --phenoCol=${phenotype} \
         --covarFile=${covar_file_eur} \
-        --qCovarCol=${qcovar_cols} \
+        ${qcovar_col_args} \
         ${covar_col_args} \
         --covarMaxLevels=30 \
         --modelSnps=${model_snps_file} \
