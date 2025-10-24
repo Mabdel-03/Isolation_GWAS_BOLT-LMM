@@ -27,17 +27,51 @@ def load_rsid_mapping(annot_file):
     """
     print(f"Loading rsID mapping from: {annot_file}")
     
-    # Read annotation file
-    df_annot = pd.read_csv(annot_file, sep='\t', compression='gzip', comment='#')
+    # Read annotation file with low_memory=False to avoid dtype warnings
+    df_annot = pd.read_csv(annot_file, sep='\t', compression='gzip', 
+                           comment='#', low_memory=False)
+    
+    print(f"  Columns in annotation file: {list(df_annot.columns[:10])}")
+    
+    # Find rsID column (could be 'Existing_variation', 'rsid', or in INFO field)
+    rsid_col = None
+    if 'Existing_variation' in df_annot.columns:
+        rsid_col = 'Existing_variation'
+    elif 'ID' in df_annot.columns and df_annot['ID'].str.startswith('rs').any():
+        # If ID column contains rsIDs
+        rsid_col = 'ID'
+    elif 'INFO' in df_annot.columns:
+        # Parse rsID from INFO field
+        print("  Note: Extracting rsID from INFO field")
+        df_annot['rsid_from_info'] = df_annot['INFO'].str.extract(r'RS=([^;]+)')
+        rsid_col = 'rsid_from_info'
+    
+    if rsid_col is None:
+        print("  WARNING: No rsID column found. Will use chr:pos:ref:alt IDs")
+        return {}
+    
+    print(f"  Using column: {rsid_col}")
     
     # Create lookup: ID (chr:pos:ref:alt) -> rsID
     # Take first rsID if multiple (separated by ;)
+    # The ID column should be chr:pos:ref:alt format
+    id_col = '#CHROM' if '#CHROM' in df_annot.columns else 'ID'
+    
+    # Build chr:pos:ref:alt ID from CHROM, POS, REF, ALT if needed
+    if 'POS' in df_annot.columns:
+        df_annot['variant_id'] = (df_annot['#CHROM'].astype(str) + ':' + 
+                                   df_annot['POS'].astype(str) + ':' +
+                                   df_annot['REF'].astype(str) + ':' +
+                                   df_annot['ALT'].astype(str))
+        id_col = 'variant_id'
+    
     lookup = (
         df_annot
-        .dropna(subset=['Existing_variation'])
-        .assign(rsid=lambda d: d['Existing_variation']
+        .dropna(subset=[rsid_col])
+        .assign(rsid=lambda d: d[rsid_col].astype(str)
                                .str.split(';').str[0].str.strip())
-        .set_index('ID')['rsid']
+        [['variant_id' if id_col == 'variant_id' else 'ID', 'rsid']]
+        .set_index(id_col)['rsid']
         .to_dict()
     )
     
