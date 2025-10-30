@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=bolt_lmm
 #SBATCH --partition=kellis
-#SBATCH --mem=150G
-#SBATCH -n 100
+#SBATCH --mem=100G
+#SBATCH -n 32
 #SBATCH --time=47:00:00
 #SBATCH --output=1_%a.out
 #SBATCH --error=1_%a.err
