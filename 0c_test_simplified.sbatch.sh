@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=bolt_test_simple
 #SBATCH --partition=kellis
-#SBATCH --mem=150G
-#SBATCH -n 100
+#SBATCH --mem=100G
+#SBATCH -n 32
 #SBATCH --time=47:00:00
 #SBATCH --output=0c.out
 #SBATCH --error=0c.err
@@ -17,7 +17,7 @@ echo "========================================"
 echo "BOLT-LMM Simplified Test Run"
 echo "Job ID: $SLURM_JOB_ID"
 echo "Node: $SLURM_NODELIST"
-echo "Resources: 150GB RAM, 100 tasks"
+echo "Resources: 100GB RAM, 32 CPUs"
 echo "Start time: $(date)"
 echo "========================================"
 
